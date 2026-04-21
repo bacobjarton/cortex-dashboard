@@ -389,7 +389,8 @@ body {
 .mr-info  { flex:1; min-width:0 }
 .mr-name  { font-size:14px; font-weight:500; color:var(--tp); white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
 .mr-lab   { font-size:12px; color:var(--td); margin-top:2px }
-.mr-elo   { font-family:var(--mono); font-size:14px; font-weight:600; color:var(--cB); font-variant-numeric:tabular-nums; flex-shrink:0 }
+.mr-elo      { font-family:var(--mono); font-size:14px; font-weight:600; color:var(--cB); font-variant-numeric:tabular-nums; flex-shrink:0 }
+.mr-elo.up   { color:#30d158 }
 .mr-dir   { font-size:11px; flex-shrink:0; font-weight:600 }
 .mr-dir.up{ color:#30d158 }   /* Apple system green */
 .mr-dir.dn{ color:#ff453a }   /* Apple system red  */
@@ -466,7 +467,8 @@ table.mt tr:hover td { background:rgba(44,44,46,.5) }
 .mt-model { font-weight:600; font-size:14px }
 .mt-lab   { color:var(--ts); font-size:13px }
 .mt-num   { font-family:var(--mono); color:var(--cM); font-weight:600 }
-.mt-elo   { font-family:var(--mono); color:var(--cB); font-weight:700; font-size:15px }
+.mt-elo      { font-family:var(--mono); color:var(--cB); font-weight:700; font-size:15px }
+.mt-elo.up   { color:#30d158 }
 .mt-note  { color:var(--ts); font-size:13px }
 .mt-new   {
   font-size:10px; font-weight:700; color:#000;
@@ -1056,7 +1058,7 @@ function ModelRankItem({m}) {
         </div>
         <div className="mr-lab">{m.lab}</div>
       </div>
-      <span className="mr-elo">{m.elo}</span>
+      <span className={`mr-elo${m.dir==='up'?' up':''}`}>{m.elo}</span>
       <span className={`mr-dir ${m.dir}`}>{m.dir==='up'?'▲':'▼'}</span>
     </div>
   );
@@ -1160,7 +1162,7 @@ function ModelsOverlay({onClose}) {
                 <td style={{color:'var(--ts)',fontSize:12}}>{m.ctx}</td>
                 <td className="mt-num">{m.mmlu}</td>
                 <td className="mt-num">{m.heval}</td>
-                <td className="mt-elo">{m.elo}</td>
+                <td className={`mt-elo${m.dir==='up'?' up':''}`}>{m.elo}</td>
                 <td><span className={`mt-dir ${m.dir}`}>{m.dir==='up'?'▲':'▼'}</span></td>
                 <td className="mt-note">{m.notes}</td>
               </tr>
