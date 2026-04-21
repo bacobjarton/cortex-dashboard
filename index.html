@@ -1110,6 +1110,12 @@ const PANEL_INFO = {
     update: 'Refreshes every 10 min',
     sources: ['TechCrunch AI','The Verge AI','VentureBeat','Wired AI','arXiv cs.AI','Hacker News'],
   },
+  trending: {
+    title: 'Trending Topics — how this works',
+    description: 'Topics are ranked by cross-platform discussion volume — a weighted score combining Reddit post activity, news article frequency, and community engagement. A score of 100 means peak buzz for the current period. Counts show how many posts/articles mentioned the topic on each platform.',
+    update: 'Curated weekly',
+    sources: ['Reddit posts', 'News articles', 'Community engagement'],
+  },
   right: {
     title: 'Model Watch — how this works',
     description: 'Arena ELO scores come from the LM Arena community leaderboard — thousands of anonymous human comparisons in blind A/B tests. Higher ELO = stronger model by real user preference, not just benchmark scores. Trending topics reflect cross-platform AI discussion volume. Rankings shown are illustrative of real standings.',
@@ -1440,7 +1446,7 @@ function App() {
               {/* Tier 2 — supporting featured */}
               {featNews.slice(1).map(n=><FeatNewsItem key={n.id} item={n} kws={wl}/>)}
               {/* Trending Topics */}
-              <div className="wire-divider">Trending Topics</div>
+              <div className="wire-divider">Trending Topics<InfoButton info={PANEL_INFO.trending}/></div>
               {TRENDING.map(t=><TrendItem key={t.id} t={t} maxScore={maxTrend}/>)}
             </>)}
           </div>
