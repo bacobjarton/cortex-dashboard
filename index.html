@@ -390,9 +390,9 @@ body {
 .mr-name  { font-size:14px; font-weight:500; color:var(--tp); white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
 .mr-lab   { font-size:12px; color:var(--td); margin-top:2px }
 .mr-elo   { font-family:var(--mono); font-size:14px; font-weight:600; color:var(--cB); font-variant-numeric:tabular-nums; flex-shrink:0 }
-.mr-dir   { font-size:11px; flex-shrink:0 }
-.mr-dir.up{ color:var(--cM) }
-.mr-dir.dn{ color:var(--pri) }
+.mr-dir   { font-size:11px; flex-shrink:0; font-weight:600 }
+.mr-dir.up{ color:#30d158 }   /* Apple system green */
+.mr-dir.dn{ color:#ff453a }   /* Apple system red  */
 .mr-new   {
   font-family:var(--sans); font-size:10px; font-weight:700;
   color:#000000; background:var(--pri);
@@ -473,8 +473,8 @@ table.mt tr:hover td { background:rgba(44,44,46,.5) }
   background:var(--pri); padding:1px 6px;
   border-radius:var(--r-xs); margin-left:8px;
 }
-.mt-dir.up { color:var(--cM) }
-.mt-dir.dn { color:var(--pri) }
+.mt-dir.up { color:#30d158; font-weight:600 }  /* Apple system green */
+.mt-dir.dn { color:#ff453a; font-weight:600 }  /* Apple system red   */
 .mt-legend {
   margin-top:24px; padding-top:16px; border-top:1px solid var(--br);
   display:flex; gap:24px; font-size:13px; color:var(--td); flex-wrap:wrap;
