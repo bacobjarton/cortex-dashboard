@@ -735,21 +735,21 @@ const SRC_C = {
 };
 
 const NEWS = [
-  {id:'n1',  source:'The Verge',  sId:'mainstream',title:'Anthropic ships Claude 3.7 Sonnet with extended thinking mode',                    content:'Anthropic released Claude 3.7 Sonnet with an optional extended thinking mode that dramatically improves reasoning on complex tasks.',                             timestamp:ago(4),   urg:'FLASH',    cat:'models'},
-  {id:'n2',  source:'TechCrunch',  sId:'mainstream',title:"Meta's Llama 4 Scout tops HumanEval at 92.3%, beats closed models",               content:'Meta released Llama 4 Scout under an open license. The model scores 92.3% on HumanEval, outperforming GPT-4o and Claude 3.5 Sonnet.',                          timestamp:ago(9),   urg:'FLASH',    cat:'models'},
-  {id:'n3',  source:'Bloomberg',   sId:'mainstream',title:'OpenAI closes $10B Series F at $300B valuation — largest private tech raise ever', content:'OpenAI raised $10 billion, pushing its valuation to $300 billion. Led by SoftBank Vision Fund with participation from existing investors.',                  timestamp:ago(16),  urg:'FLASH',    cat:'funding'},
-  {id:'n4',  source:'Wired',       sId:'mainstream',title:'Google DeepMind releases Gemini 2.5 Pro with 2 million token context window',      content:'Gemini 2.5 Pro features an unprecedented 2M token context window, enabling processing of entire codebases or hours of video in a single pass.',             timestamp:ago(28),  urg:'PRIORITY', cat:'models'},
-  {id:'n5',  source:'TechCrunch',  sId:'mainstream',title:"xAI's Grok 3 claims top GPQA benchmark score",                                    content:"Grok 3 achieved an 84.6% score on GPQA Diamond, the highest recorded for any frontier model on that evaluation.",                                              timestamp:ago(37),  urg:'PRIORITY', cat:'models'},
-  {id:'n6',  source:'arXiv',       sId:'arxiv',     title:'DeepSeek R2: 78.3% on AIME 2025 with novel chain-of-thought scaling',             content:'DeepSeek researchers publish R2 technical report. The model achieves state-of-the-art on mathematical reasoning benchmarks.',                                   timestamp:ago(49),  urg:'PRIORITY', cat:'research'},
-  {id:'n7',  source:'FT',          sId:'mainstream',title:'EU AI Act enforcement begins — high-risk AI systems face mandatory audits',        content:'The European Union began enforcing the AI Act. Companies using AI in hiring, credit scoring, or critical infrastructure must comply or face fines.',              timestamp:ago(58),  urg:'PRIORITY', cat:'policy'},
-  {id:'n8',  source:'Bloomberg',   sId:'mainstream',title:'Scale AI raises $1B Series F to expand RLHF data operations',                     content:"Scale AI secured $1 billion in new funding to scale its reinforcement learning from human feedback operations amid the model arms race.",                         timestamp:ago(71),  urg:'PRIORITY', cat:'funding'},
-  {id:'n9',  source:'GitHub Blog', sId:'github',    title:'GitHub Copilot X integrates Claude 3.7 for advanced code review',                 content:"GitHub announced Copilot X will use Anthropic's Claude 3.7 Sonnet for code review features, citing superior performance on large codebase tasks.",               timestamp:ago(84),  urg:'PRIORITY', cat:'products'},
-  {id:'n10', source:'Hacker News', sId:'hn',        title:'Ask HN: Quality jump in Claude 3.7 extended thinking?',                           content:'Top HN thread with 847 comments as developers share results. Consensus: meaningful improvement on complex, multi-step reasoning tasks.',                         timestamp:ago(96),  urg:'ROUTINE',  cat:'models'},
-  {id:'n11', source:'Wired',       sId:'mainstream',title:'Hugging Face surpasses 1 million models milestone',                               content:"Hugging Face crossed one million models on its platform. New models are being published at a rate of one per minute.",                                          timestamp:ago(112), urg:'ROUTINE',  cat:'opensource'},
-  {id:'n12', source:'NYT Tech',    sId:'mainstream',title:"OpenAI's GPT-4o real-time voice API now open to all developers",                  content:'OpenAI opened its real-time voice API to all developers, enabling natural spoken conversations at roughly $0.06 per minute.',                                   timestamp:ago(128), urg:'ROUTINE',  cat:'products'},
-  {id:'n13', source:'arXiv',       sId:'arxiv',     title:'MMLU-Pro: A harder benchmark reveals frontier model gaps in expert reasoning',    content:'Researchers release MMLU-Pro. Leading models score 8-12 points lower than on original MMLU, suggesting benchmark saturation.',                                  timestamp:ago(144), urg:'ROUTINE',  cat:'research'},
-  {id:'n14', source:'Perplexity',  sId:'mainstream',title:'Perplexity AI raises $250M Series C for AI-native search',                        content:'Perplexity AI announced $250M at a $3B valuation. The company handles 100M queries per day, up 10x from a year ago.',                                        timestamp:ago(163), urg:'ROUTINE',  cat:'funding'},
-  {id:'n15', source:'arXiv',       sId:'arxiv',     title:'Constitutional AI v2: Anthropic publishes updated alignment framework',           content:'Anthropic releases Constitutional AI version 2, detailing improvements to training helpful, harmless, and honest AI systems.',                                  timestamp:ago(181), urg:'ROUTINE',  cat:'research'},
+  {id:'n1',  source:'The Verge',  sId:'mainstream',url:'https://www.theverge.com/ai-artificial-intelligence',         title:'Anthropic ships Claude 3.7 Sonnet with extended thinking mode',                    content:'Anthropic released Claude 3.7 Sonnet with an optional extended thinking mode that dramatically improves reasoning on complex tasks.',                             timestamp:ago(4),   urg:'FLASH',    cat:'models'},
+  {id:'n2',  source:'TechCrunch', sId:'mainstream',url:'https://techcrunch.com/category/artificial-intelligence/',    title:"Meta's Llama 4 Scout tops HumanEval at 92.3%, beats closed models",               content:'Meta released Llama 4 Scout under an open license. The model scores 92.3% on HumanEval, outperforming GPT-4o and Claude 3.5 Sonnet.',                          timestamp:ago(9),   urg:'FLASH',    cat:'models'},
+  {id:'n3',  source:'Bloomberg',  sId:'mainstream',url:'https://www.bloomberg.com/technology',                        title:'OpenAI closes $10B Series F at $300B valuation — largest private tech raise ever', content:'OpenAI raised $10 billion, pushing its valuation to $300 billion. Led by SoftBank Vision Fund with participation from existing investors.',                  timestamp:ago(16),  urg:'FLASH',    cat:'funding'},
+  {id:'n4',  source:'Wired',      sId:'mainstream',url:'https://www.wired.com/tag/artificial-intelligence/',          title:'Google DeepMind releases Gemini 2.5 Pro with 2 million token context window',      content:'Gemini 2.5 Pro features an unprecedented 2M token context window, enabling processing of entire codebases or hours of video in a single pass.',             timestamp:ago(28),  urg:'PRIORITY', cat:'models'},
+  {id:'n5',  source:'TechCrunch', sId:'mainstream',url:'https://techcrunch.com/category/artificial-intelligence/',    title:"xAI's Grok 3 claims top GPQA benchmark score",                                    content:"Grok 3 achieved an 84.6% score on GPQA Diamond, the highest recorded for any frontier model on that evaluation.",                                              timestamp:ago(37),  urg:'PRIORITY', cat:'models'},
+  {id:'n6',  source:'arXiv',      sId:'arxiv',     url:'https://arxiv.org/list/cs.AI/recent',                        title:'DeepSeek R2: 78.3% on AIME 2025 with novel chain-of-thought scaling',             content:'DeepSeek researchers publish R2 technical report. The model achieves state-of-the-art on mathematical reasoning benchmarks.',                                   timestamp:ago(49),  urg:'PRIORITY', cat:'research'},
+  {id:'n7',  source:'FT',         sId:'mainstream',url:'https://www.ft.com/technology',                               title:'EU AI Act enforcement begins — high-risk AI systems face mandatory audits',        content:'The European Union began enforcing the AI Act. Companies using AI in hiring, credit scoring, or critical infrastructure must comply or face fines.',              timestamp:ago(58),  urg:'PRIORITY', cat:'policy'},
+  {id:'n8',  source:'Bloomberg',  sId:'mainstream',url:'https://www.bloomberg.com/technology',                        title:'Scale AI raises $1B Series F to expand RLHF data operations',                     content:"Scale AI secured $1 billion in new funding to scale its reinforcement learning from human feedback operations amid the model arms race.",                         timestamp:ago(71),  urg:'PRIORITY', cat:'funding'},
+  {id:'n9',  source:'GitHub Blog',sId:'github',    url:'https://github.blog/',                                        title:'GitHub Copilot X integrates Claude 3.7 for advanced code review',                 content:"GitHub announced Copilot X will use Anthropic's Claude 3.7 Sonnet for code review features, citing superior performance on large codebase tasks.",               timestamp:ago(84),  urg:'PRIORITY', cat:'products'},
+  {id:'n10', source:'Hacker News',sId:'hn',        url:'https://news.ycombinator.com/',                               title:'Ask HN: Quality jump in Claude 3.7 extended thinking?',                           content:'Top HN thread with 847 comments as developers share results. Consensus: meaningful improvement on complex, multi-step reasoning tasks.',                         timestamp:ago(96),  urg:'ROUTINE',  cat:'models'},
+  {id:'n11', source:'Wired',      sId:'mainstream',url:'https://www.wired.com/tag/artificial-intelligence/',          title:'Hugging Face surpasses 1 million models milestone',                               content:"Hugging Face crossed one million models on its platform. New models are being published at a rate of one per minute.",                                          timestamp:ago(112), urg:'ROUTINE',  cat:'opensource'},
+  {id:'n12', source:'NYT Tech',   sId:'mainstream',url:'https://www.nytimes.com/section/technology',                  title:"OpenAI's GPT-4o real-time voice API now open to all developers",                  content:'OpenAI opened its real-time voice API to all developers, enabling natural spoken conversations at roughly $0.06 per minute.',                                   timestamp:ago(128), urg:'ROUTINE',  cat:'products'},
+  {id:'n13', source:'arXiv',      sId:'arxiv',     url:'https://arxiv.org/list/cs.AI/recent',           title:'MMLU-Pro: A harder benchmark reveals frontier model gaps in expert reasoning',    content:'Researchers release MMLU-Pro. Leading models score 8-12 points lower than on original MMLU, suggesting benchmark saturation.',                                  timestamp:ago(144), urg:'ROUTINE',  cat:'research'},
+  {id:'n14', source:'Perplexity', sId:'mainstream',url:'https://www.perplexity.ai/',                     title:'Perplexity AI raises $250M Series C for AI-native search',                        content:'Perplexity AI announced $250M at a $3B valuation. The company handles 100M queries per day, up 10x from a year ago.',                                        timestamp:ago(163), urg:'ROUTINE',  cat:'funding'},
+  {id:'n15', source:'arXiv',      sId:'arxiv',     url:'https://arxiv.org/list/cs.AI/recent',           title:'Constitutional AI v2: Anthropic publishes updated alignment framework',           content:'Anthropic releases Constitutional AI version 2, detailing improvements to training helpful, harmless, and honest AI systems.',                                  timestamp:ago(181), urg:'ROUTINE',  cat:'research'},
 ];
 
 const LEADERBOARD = [
@@ -981,8 +981,9 @@ function SocialPost({post, kws}) {
 function LeadNewsItem({item, kws}) {
   const mk  = matchedKws(item, kws);
   const uc  = item.urg==='FLASH'?'fl':item.urg==='PRIORITY'?'pr':'rt';
+  const open = ()=>item.url&&window.open(item.url,'_blank','noopener,noreferrer');
   return (
-    <div className={`ni-lead ${uc}`}>
+    <div className={`ni-lead ${uc}`} onClick={open} style={item.url?{cursor:'pointer'}:{}}>
       <div className="ni-top">
         <span className={`ni-urg urg-${uc}`}>{URG_SYM[item.urg]}</span>
         <span className="ni-src" style={{color:SRC_C[item.source]||'var(--tl)'}}>{item.source}</span>
@@ -1000,8 +1001,9 @@ function LeadNewsItem({item, kws}) {
 function FeatNewsItem({item, kws}) {
   const mk  = matchedKws(item, kws);
   const uc  = item.urg==='FLASH'?'fl':item.urg==='PRIORITY'?'pr':'rt';
+  const open = ()=>item.url&&window.open(item.url,'_blank','noopener,noreferrer');
   return (
-    <div className={`ni-feat ${uc}`}>
+    <div className={`ni-feat ${uc}`} onClick={open} style={item.url?{cursor:'pointer'}:{}}>
       <div className="ni-top">
         <span className={`ni-urg urg-${uc}`}>{URG_SYM[item.urg]}</span>
         <span className="ni-src" style={{color:SRC_C[item.source]||'var(--tl)'}}>{item.source}</span>
@@ -1018,8 +1020,9 @@ function FeatNewsItem({item, kws}) {
 // Tier 3 — Compact story: single-line scannable row, no body text
 function CompactNewsItem({item, kws}) {
   const uc = item.urg==='FLASH'?'fl':item.urg==='PRIORITY'?'pr':'rt';
+  const open = ()=>item.url&&window.open(item.url,'_blank','noopener,noreferrer');
   return (
-    <div className={`ni-compact ${uc}`}>
+    <div className={`ni-compact ${uc}`} onClick={open} style={item.url?{cursor:'pointer'}:{}}>
       <span className={`ni-urg urg-${uc}`}>{URG_SYM[item.urg]}</span>
       <span className="ni-src" style={{color:SRC_C[item.source]||'var(--ts)'}}>{item.source}</span>
       <span className="ni-title"><Hl text={item.title} kws={kws}/></span>
@@ -1407,12 +1410,9 @@ function App() {
               {featNews[0] && <LeadNewsItem item={featNews[0]} kws={wl}/>}
               {/* Tier 2 — supporting featured */}
               {featNews.slice(1).map(n=><FeatNewsItem key={n.id} item={n} kws={wl}/>)}
-              {/* Divider */}
-              {compactNews.length>0 && (
-                <div className="wire-divider">More stories — {compactNews.length}</div>
-              )}
-              {/* Tier 3 — compact list */}
-              {compactNews.map(n=><CompactNewsItem key={n.id} item={n} kws={wl}/>)}
+              {/* Trending Topics */}
+              <div className="wire-divider">Trending Topics</div>
+              {TRENDING.map(t=><TrendItem key={t.id} t={t} maxScore={maxTrend}/>)}
             </>)}
           </div>
         </div>
@@ -1429,8 +1429,6 @@ function App() {
           <div id="pc-right" className="pc">
             <div className="sec-div"><span>Arena ELO Leaderboard</span><span>{LEADERBOARD.length}</span></div>
             {LEADERBOARD.map(m=><ModelRankItem key={m.id} m={m}/>)}
-            <div className="sec-div" style={{marginTop:4}}><span>Trending Topics</span><span>{TRENDING.length}</span></div>
-            {TRENDING.map(t=><TrendItem key={t.id} t={t} maxScore={maxTrend}/>)}
           </div>
         </div>
 
