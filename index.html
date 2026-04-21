@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>CORTEX — AI Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  /* Zapier warm dark backgrounds */
+  --bg:   #0c0704;
+  --bg2:  #140a05;
+  --bgp:  #100806;
+  --bgh:  #080502;
+  --bghv: #1e0f07;
+  --bgi:  #100806;
+
+  /* Zapier orange — primary accent */
+  --cB:  #ff8055;   /* brighter for highlighted elements */
+  --cM:  #ff4a00;   /* Zapier primary */
+  --cD:  #7a2400;
+  --cF:  #280e00;
+
+  /*
+    Urgency — luminance-coded (safe for all color blindness types):
+    FLASH    = near-white  (~95% brightness) — unmissable
+    PRIORITY = bright amber (~65% brightness) — notable
+    ROUTINE  = dim text    (~15% brightness) — background noise
+    Each tier is also shape-coded: ⚡ ▲ ·
+  */
+  --fla:  #fff8e8;   /* near-white warm — FLASH */
+  --flaD: #7a6a50;
+  --flaF: #2a2010;
+
+  --pri:  #ffb830;   /* bright amber — PRIORITY, clearly brighter than orange chrome */
+  --priD: #7a5800;
+  --priF: #281c00;
+
+  /* Text — high contrast */
+  --tp:  #f8f0e4;   /* near-white warm — primary content */
+  --ts:  #d4a872;   /* warm tan — secondary labels */
+  --td:  #8a6040;   /* warm brown — dim/meta, still readable */
+  --tl:  #c89060;   /* warm label color */
+
+  /* Borders */
+  --br:  #1e0b04;
+  --brH: #3c1808;
+
+  --mono: 'IBM Plex Mono','Courier New',Consolas,monospace;
+  --r: 3px;
+}
+
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0 }
+html { font-size:13px; -webkit-font-smoothing:antialiased }
+body {
+  background:var(--bg); color:var(--tp);
+  font-family:var(--mono); overflow:hidden;
+  height:100vh; width:100vw; user-select:none;
+}
+
+::-webkit-scrollbar { width:2px }
+::-webkit-scrollbar-track { background:transparent }
+::-webkit-scrollbar-thumb { background:var(--brH); border-radius:2px }
+
+/* subtle vignette only, no scanlines */
+body::before {
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:9999;
+  background:radial-gradient(ellipse at center,transparent 60%,rgba(0,0,0,.35) 100%);
+}
+
+@keyframes pulseDot { 0%,100%{opacity:1} 50%{opacity:.3} }
+@keyframes blink    { 0%,100%{opacity:1} 50%{opacity:0} }
+@keyframes slideIn  { from{opacity:0;transform:translateY(-4px)} to{opacity:1;transform:translateY(0)} }
+@keyframes fadeIn   { from{opacity:0} to{opacity:1} }
+@keyframes pulseYel { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+.app { display:flex; flex-direction:column; height:100vh; overflow:hidden }
+
+/* ── Header ── */
+.hdr {
+  height:52px; flex-shrink:0;
+  border-bottom:2px solid var(--brH);
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 20px; background:var(--bgh);
+}
+.hdr-left  { display:flex; align-items:center; gap:14px }
+.hdr-title {
+  /* #ffffff on #080502 = 21:1 — WCAG AAA */
+  font-size:17px; font-weight:700; letter-spacing:.1em; color:#ffffff;
+}
+.hdr-badge {
+  /* #ff8055 on #080502 ≈ 5.2:1 — WCAG AA for normal text */
+  font-size:9px; letter-spacing:.12em; font-weight:600;
+  color:#ff8055; border:1px solid rgba(255,128,85,.4); padding:3px 9px;
+}
+.demo-pill {
+  display:flex; align-items:center; gap:6px;
+  /* #d4a872 on #080502 ≈ 4.9:1 — WCAG AA */
+  font-size:9px; color:var(--ts); letter-spacing:.06em;
+}
+.demo-dot {
+  width:6px; height:6px; border-radius:50%;
+  background:var(--cM); animation:pulseDot 2.4s ease-in-out infinite;
+}
+/* #d4a872 on #080502 ≈ 4.9:1 — WCAG AA */
+.hdr-clock { font-size:11px; color:var(--ts); letter-spacing:.04em; font-variant-numeric:tabular-nums }
+.hdr-right { display:flex; align-items:center; gap:8px }
+.flash-pill {
+  /* #fff8e8 on dark amber bg — very high contrast */
+  font-size:9px; font-weight:600; letter-spacing:.06em; color:#1a0e00;
+  background:var(--fla); border:none; padding:4px 10px;
+}
+.btn {
+  font-family:var(--mono); font-size:10px; letter-spacing:.06em;
+  background:transparent; border:1px solid var(--brH);
+  padding:5px 12px; cursor:pointer; transition:all .15s;
+  /* #d4a872 on #080502 ≈ 4.9:1 — WCAG AA */
+  color:var(--ts);
+}
+.btn:hover       { border-color:var(--ts); color:var(--tp) }
+.btn.primary     { color:#ff8055; border-color:rgba(255,128,85,.5); font-weight:600 }
+.btn.primary:hover { background:rgba(255,128,85,.1); color:#ffaa88; border-color:#ff8055 }
+.btn.primary.on  { background:rgba(255,128,85,.15); color:#ffaa88; border-color:#ff8055 }
+.btn.accent      { color:var(--ts); border-color:var(--brH) }
+.btn.accent:hover{ color:var(--tp); border-color:var(--ts) }
+
+/* ── Filter Bar ── */
+.fbar {
+  height:38px; flex-shrink:0;
+  border-bottom:1px solid var(--brH);
+  display:flex; align-items:center; gap:5px; padding:0 20px;
+  overflow-x:auto; scrollbar-width:none; background:var(--bg2);
+}
+.fbar::-webkit-scrollbar { display:none }
+.chip {
+  font-family:var(--mono); font-size:9px; letter-spacing:.05em;
+  /* #d4a872 on #140a05 ≈ 4.7:1 — WCAG AA */
+  color:var(--ts); background:transparent; border:1px solid transparent;
+  padding:4px 10px; cursor:pointer; white-space:nowrap;
+  border-radius:var(--r); transition:all .12s;
+}
+.chip:hover   { color:var(--tp); background:rgba(255,255,255,.04); border-color:var(--brH) }
+.chip.on      { color:#ffaa88; background:rgba(255,128,85,.1); border-color:rgba(255,128,85,.4); font-weight:600 }
+.chip.on.fl   { color:var(--fla); background:rgba(255,248,232,.08); border-color:var(--flaD) }
+.chip.on.pr   { color:var(--pri); background:rgba(255,184,48,.08); border-color:var(--priD) }
+.fdiv { width:1px; height:16px; background:var(--brH); flex-shrink:0; margin:0 3px }
+.fsrch {
+  font-family:var(--mono); font-size:11px;
+  background:transparent; border:1px solid transparent;
+  border-radius:var(--r); color:var(--tp); padding:4px 10px; outline:none;
+  min-width:130px; max-width:200px; flex:1;
+  transition:border-color .15s;
+}
+/* #8a6040 on #140a05 ≈ 2.8:1 — too low; use var(--ts) instead */
+.fsrch::placeholder { color:var(--ts); opacity:.7 }
+.fsrch:focus { border-color:rgba(255,128,85,.5); background:rgba(255,74,0,.04) }
+
+/* ── Panels ── */
+.panels {
+  display:grid; grid-template-columns:27% 1fr 26%;
+  gap:0; border-top:0;
+  flex:1; min-height:0; overflow:hidden;
+}
+.panel {
+  background:var(--bgp); display:flex; flex-direction:column;
+  overflow:hidden; transition:box-shadow .2s;
+  border-right:1px solid var(--br);
+}
+.panel:last-child { border-right:none }
+.panel.focused { box-shadow:inset 0 0 0 1px rgba(255,74,0,.2) }
+.ph {
+  padding:10px 16px 9px; border-bottom:1px solid var(--brH);
+  display:flex; align-items:center; justify-content:space-between;
+  flex-shrink:0; background:rgba(8,5,2,.6);
+}
+/* #f8f0e4 on dark — 19:1 — WCAG AAA */
+.ph-title { font-size:10px; font-weight:700; letter-spacing:.12em; color:var(--tp); text-transform:uppercase }
+/* #d4a872 — WCAG AA */
+.ph-meta  { display:flex; align-items:center; gap:8px; font-size:9px; color:var(--ts) }
+.ph-dot   { width:5px; height:5px; border-radius:50%; background:var(--cM); animation:pulseDot 2.4s ease-in-out infinite }
+.pc       { flex:1; overflow-y:auto; overflow-x:hidden }
+
+/* ── Social Post ── */
+.sp {
+  padding:14px 16px; border-bottom:1px solid var(--br);
+  cursor:pointer; transition:background .12s; animation:slideIn .18s ease-out;
+  position:relative;
+}
+.sp:hover { background:var(--bghv) }
+.sp.fl::before,
+.sp.pr::before {
+  content:''; position:absolute; left:0; top:0; bottom:0; width:2px;
+}
+.sp.fl::before { background:var(--fla) }
+.sp.pr::before { background:var(--pri) }
+.sp-top    { display:flex; align-items:center; gap:8px; margin-bottom:7px }
+.sp-plat   { font-size:7px; font-weight:700; letter-spacing:.08em; padding:2px 5px; flex-shrink:0 }
+.sp-plat.li{ color:#4ab0d8; background:rgba(0,100,181,.12); border:1px solid rgba(0,100,181,.25) }
+.sp-plat.x { color:#8098ac; background:rgba(100,130,150,.08); border:1px solid rgba(80,110,130,.2) }
+.sp-handle { font-size:10px; font-weight:600; color:var(--cM) }
+.sp-time   { font-size:8px; color:var(--td); margin-left:auto }
+.sp-body   { font-size:11.5px; color:var(--tp); line-height:1.55; margin-bottom:8px }
+.sp-foot   { display:flex; align-items:center; gap:12px; font-size:8px; color:var(--td) }
+.sp-eng    { color:var(--ts) }
+.sp-tag    { margin-left:auto; font-size:7px; color:var(--tl); letter-spacing:.08em }
+
+/* ── News Items — three-tier hierarchy ── */
+
+/* TIER 1: Lead story (rank #1) — maximum visual weight */
+.ni-lead {
+  padding:20px 18px 18px; border-bottom:2px solid var(--brH);
+  cursor:pointer; transition:background .12s; animation:slideIn .2s ease-out;
+  position:relative; background:rgba(20,10,5,.6);
+}
+.ni-lead:hover { background:var(--bghv) }
+.ni-lead::before {
+  content:''; position:absolute; left:0; top:0; bottom:0; width:3px;
+}
+.ni-lead.fl::before { background:var(--fla) }
+.ni-lead.pr::before { background:var(--pri) }
+.ni-lead.rt::before { background:var(--brH) }
+/* lead meta row */
+.ni-lead .ni-top  { display:flex; align-items:center; gap:8px; margin-bottom:10px }
+.ni-lead .ni-urg  { font-size:9px; flex-shrink:0 }
+.ni-lead .ni-src  { font-size:9px; letter-spacing:.06em; font-weight:700 }
+.ni-lead .ni-cat  { font-size:8px; color:var(--ts); letter-spacing:.05em }
+.ni-lead .ni-time { font-size:8px; color:var(--ts); margin-left:auto }
+/* lead headline — large, bold, high contrast */
+.ni-lead .ni-title {
+  font-size:16px; font-weight:700; color:var(--tp);
+  line-height:1.38; margin-bottom:10px; letter-spacing:.01em;
+}
+/* lead body — full 3 lines */
+.ni-lead .ni-body {
+  font-size:12px; color:var(--ts); line-height:1.6;
+  display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;
+}
+
+/* TIER 2: Featured stories (rank #2-3) — medium weight */
+.ni-feat {
+  padding:14px 18px; border-bottom:1px solid var(--brH);
+  cursor:pointer; transition:background .12s; animation:slideIn .2s ease-out;
+  position:relative;
+}
+.ni-feat:hover { background:var(--bghv) }
+.ni-feat::before {
+  content:''; position:absolute; left:0; top:0; bottom:0; width:2px;
+}
+.ni-feat.fl::before { background:var(--fla) }
+.ni-feat.pr::before { background:var(--pri) }
+.ni-feat.rt::before { background:var(--brH) }
+.ni-feat .ni-top  { display:flex; align-items:center; gap:8px; margin-bottom:7px }
+.ni-feat .ni-urg  { font-size:9px; flex-shrink:0 }
+.ni-feat .ni-src  { font-size:8px; letter-spacing:.06em; font-weight:600 }
+.ni-feat .ni-cat  { font-size:7px; color:var(--ts); letter-spacing:.05em }
+.ni-feat .ni-time { font-size:8px; color:var(--ts); margin-left:auto }
+.ni-feat .ni-title {
+  font-size:13px; font-weight:600; color:var(--tp);
+  line-height:1.42; margin-bottom:6px;
+}
+.ni-feat .ni-body {
+  font-size:11px; color:var(--ts); line-height:1.5;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+}
+
+/* Divider between featured and compact sections */
+.wire-divider {
+  display:flex; align-items:center; gap:10px;
+  padding:9px 18px; border-bottom:1px solid var(--brH);
+  font-size:8px; font-weight:700; letter-spacing:.14em;
+  color:var(--ts); background:rgba(8,5,2,.7);
+  flex-shrink:0;
+}
+.wire-divider::after {
+  content:''; flex:1; height:1px; background:var(--brH);
+}
+
+/* TIER 3: Compact stories (rank #4+) — minimal, scannable */
+.ni-compact {
+  padding:9px 18px; border-bottom:1px solid var(--br);
+  cursor:pointer; transition:background .12s;
+  display:flex; align-items:baseline; gap:8px; position:relative;
+}
+.ni-compact:hover { background:var(--bghv) }
+.ni-compact .ni-urg  { font-size:8px; flex-shrink:0 }
+.ni-compact .ni-src  { font-size:8px; color:var(--ts); font-weight:600; flex-shrink:0; letter-spacing:.04em }
+.ni-compact .ni-title {
+  font-size:10.5px; font-weight:400; color:var(--ts);
+  line-height:1.4; flex:1;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.ni-compact .ni-time { font-size:8px; color:var(--td); flex-shrink:0; font-variant-numeric:tabular-nums }
+.ni-compact.fl .ni-title { color:var(--tp) }
+.ni-compact.pr .ni-title { color:var(--tp); opacity:.9 }
+
+/* Urgency color helpers (shared) */
+.urg-fl { color:var(--fla) }
+.urg-pr { color:var(--pri) }
+.urg-rt { color:var(--td) }
+
+/* ── Old .ni kept for non-wire panels ── */
+.ni {
+  padding:14px 16px; border-bottom:1px solid var(--br);
+  cursor:pointer; transition:background .12s; animation:slideIn .18s ease-out;
+  position:relative;
+}
+.ni:hover { background:var(--bghv) }
+.ni.fl::before,
+.ni.pr::before {
+  content:''; position:absolute; left:0; top:0; bottom:0; width:2px;
+}
+.ni.fl::before { background:var(--fla) }
+.ni.pr::before { background:var(--pri) }
+.ni-top   { display:flex; align-items:center; gap:8px; margin-bottom:6px }
+.ni-urg   { font-size:8px; flex-shrink:0 }
+.ni-urg.fl{ color:var(--fla) }
+.ni-urg.pr{ color:var(--pri) }
+.ni-urg.rt{ color:var(--td) }
+.ni-src   { font-size:8px; letter-spacing:.06em; font-weight:600 }
+.ni-cat   { font-size:7px; color:var(--ts); letter-spacing:.05em; margin-left:2px }
+.ni-time  { font-size:8px; color:var(--ts); margin-left:auto }
+.ni-title { font-size:12px; font-weight:500; color:var(--tp); line-height:1.48; margin-bottom:5px }
+.ni-body  { font-size:10.5px; color:var(--ts); line-height:1.5; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden }
+
+/* ── Model Leaderboard ── */
+.mr {
+  padding:10px 16px; border-bottom:1px solid var(--br);
+  cursor:pointer; transition:background .12s;
+  display:flex; align-items:center; gap:10px;
+}
+.mr:hover { background:var(--bghv) }
+.mr-rank  { font-size:9px; color:var(--td); min-width:20px; text-align:right; font-variant-numeric:tabular-nums }
+.mr-rank.top { color:var(--cM) }
+.mr-info  { flex:1; min-width:0 }
+.mr-name  { font-size:11px; font-weight:500; color:var(--tp); white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+.mr-lab   { font-size:8px; color:var(--td); margin-top:1px }
+.mr-elo   { font-size:12px; font-weight:600; color:var(--cM); font-variant-numeric:tabular-nums; flex-shrink:0 }
+.mr-dir   { font-size:9px; flex-shrink:0 }
+.mr-dir.up { color:var(--cM) }
+.mr-dir.dn { color:var(--pri) }
+.mr-new   { font-size:7px; color:var(--fla); border:1px solid var(--flaD); padding:0 3px; letter-spacing:.06em; flex-shrink:0; animation:pulseYel 2.5s ease-in-out infinite }
+
+/* ── Trending ── */
+.tr {
+  padding:10px 16px; border-bottom:1px solid var(--br);
+}
+.tr-top  { display:flex; align-items:baseline; gap:8px; margin-bottom:5px }
+.tr-rank { font-size:8px; color:var(--td); min-width:14px }
+.tr-name { font-size:10px; color:var(--tp); flex:1 }
+.tr-score{ font-size:9px; color:var(--cM); font-variant-numeric:tabular-nums }
+.tr-bar  { height:1px; background:var(--br); margin-bottom:5px }
+.tr-fill { height:100%; background:linear-gradient(90deg,var(--cD),var(--cM)); transition:width .6s }
+.tr-foot { display:flex; gap:10px; font-size:8px; color:var(--td) }
+.tr-src-badge { font-size:7px; padding:0 3px; border:1px solid }
+.tr-src-badge.li { color:#4ab0d8; border-color:rgba(0,100,181,.3) }
+.tr-src-badge.x  { color:#8098ac; border-color:rgba(80,110,130,.3) }
+.tr-src-badge.nw { color:var(--ts); border-color:var(--br) }
+
+/* ── Section Divider ── */
+.sec-div {
+  padding:8px 16px; font-size:7px; font-weight:600; letter-spacing:.18em;
+  color:var(--td); background:rgba(2,6,10,.6); border-bottom:1px solid var(--br);
+  display:flex; justify-content:space-between;
+}
+
+/* ── Keyword Highlight ── */
+.kh { background:rgba(255,140,0,.15); color:var(--pri) }
+
+/* ── Models Overlay ── */
+.models-overlay {
+  position:fixed; inset:0; background:rgba(3,10,18,.97);
+  z-index:900; display:flex; flex-direction:column;
+  animation:fadeIn .15s ease-out;
+}
+.moh {
+  height:44px; flex-shrink:0; border-bottom:1px solid var(--br);
+  display:flex; align-items:center; justify-content:space-between; padding:0 24px;
+}
+.moh-title { font-size:11px; font-weight:600; letter-spacing:.1em; color:var(--cM) }
+.mo-wrap { flex:1; overflow-y:auto; overflow-x:auto; padding:24px }
+table.mt {
+  width:100%; border-collapse:collapse; min-width:800px;
+}
+table.mt th {
+  text-align:left; padding:6px 12px;
+  font-size:7px; font-weight:700; letter-spacing:.14em; color:var(--td);
+  border-bottom:1px solid var(--brH); white-space:nowrap; background:transparent;
+}
+table.mt td {
+  padding:9px 12px; border-bottom:1px solid rgba(8,24,40,.8);
+  font-size:10.5px; color:var(--tp); vertical-align:middle;
+}
+table.mt tr:hover td { background:var(--bghv) }
+.mt-rank  { color:var(--td); font-size:9px }
+.mt-model { font-weight:500 }
+.mt-lab   { color:var(--ts); font-size:9px }
+.mt-num   { color:var(--cM); font-weight:600; font-variant-numeric:tabular-nums }
+.mt-elo   { color:var(--cB); font-weight:700; font-size:12px; font-variant-numeric:tabular-nums }
+.mt-note  { color:var(--ts); font-size:9px }
+.mt-new   { font-size:7px; color:var(--fla); border:1px solid var(--flaD); padding:0 4px; margin-left:6px; letter-spacing:.06em }
+.mt-dir.up{ color:var(--cM) }
+.mt-dir.dn{ color:var(--pri) }
+.mt-legend{ margin-top:20px; display:flex; gap:20px; font-size:8px; color:var(--td); flex-wrap:wrap }
+.mt-legend span span { color:var(--ts) }
+
+/* ── Watchlist Modal ── */
+.mo {
+  position:fixed; inset:0; background:rgba(3,10,18,.92);
+  display:flex; align-items:center; justify-content:center; z-index:1000;
+  animation:fadeIn .12s ease-out;
+}
+.mo-box {
+  background:var(--bg2); border:1px solid var(--brH); padding:22px;
+  min-width:360px; box-shadow:0 20px 60px rgba(0,0,0,.6);
+}
+.mo-title  { font-size:9px; font-weight:600; letter-spacing:.16em; color:var(--tl); margin-bottom:14px }
+.wl-tags   { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:14px; min-height:28px }
+.wl-tag    { display:inline-flex; align-items:center; gap:4px; font-size:9px; color:var(--pri); background:rgba(255,140,0,.06); border:1px solid var(--priD); padding:3px 8px }
+.wl-tag button { background:none; border:none; color:var(--priD); cursor:pointer; font-size:10px; line-height:1 }
+.wl-tag button:hover { color:var(--pri) }
+.mo-row  { display:flex; gap:6px; margin-bottom:12px }
+.mo-in   { flex:1; font-family:var(--mono); font-size:11px; background:var(--bgi); border:1px solid var(--brH); color:var(--tp); padding:6px 10px; outline:none }
+.mo-in:focus { border-color:var(--cD) }
+.mo-btn  { font-family:var(--mono); font-size:9px; letter-spacing:.08em; padding:6px 12px; cursor:pointer; border:1px solid; background:transparent }
+.mo-add  { color:var(--cM); border-color:var(--cD) }
+.mo-add:hover { background:rgba(255,74,0,.08) }
+.mo-cls  { color:var(--td); border-color:var(--br) }
+.mo-cls:hover { color:var(--ts) }
+.mo-hint { font-size:8px; color:var(--td); border-top:1px solid var(--br); padding-top:10px }
+
+/* ── Status Bar ── */
+.sbar {
+  height:26px; flex-shrink:0;
+  border-top:1px solid var(--brH);
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 20px; font-size:8px; letter-spacing:.04em;
+  /* #d4a872 — WCAG AA */
+  color:var(--ts);
+}
+.sbar kbd {
+  font-family:var(--mono); font-size:8px;
+  background:var(--brH); border:1px solid var(--ts); padding:1px 5px;
+  /* #f8f0e4 on #3c1808 — high contrast */
+  color:var(--tp);
+}
+.sbar-sc { display:flex; gap:12px }
+::selection { background:rgba(255,74,0,.2); color:var(--cB) }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script type="text/babel">
+const { useState, useEffect, useMemo, useRef } = React;
+
+const ago = m => new Date(Date.now() - m * 60000).toISOString();
+function timeAgo(iso) {
+  const d = (Date.now() - new Date(iso).getTime()) / 1000;
+  if (d < 60)    return `${Math.floor(d)}s`;
+  if (d < 3600)  return `${Math.floor(d/60)}m`;
+  if (d < 86400) return `${Math.floor(d/3600)}h`;
+  return `${Math.floor(d/86400)}d`;
+}
+function hlText(text, kws) {
+  if (!text || !kws.length) return [{t:text,h:false}];
+  const re = new RegExp(`(${kws.map(k=>k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|')})`, 'gi');
+  return text.split(re).map(p=>({t:p,h:kws.some(k=>k.toLowerCase()===p.toLowerCase())}));
+}
+function Hl({text,kws}) {
+  return <>{hlText(text,kws).map((s,i)=>s.h?<mark key={i} className="kh">{s.t}</mark>:<span key={i}>{s.t}</span>)}</>;
+}
+function matchedKws(item,kws) {
+  const t=`${item.title||''} ${item.content||''}`.toLowerCase();
+  return kws.filter(k=>t.includes(k.toLowerCase()));
+}
+function fmtNum(n) {
+  if(n>=1000000)return`${(n/1e6).toFixed(1)}M`;
+  if(n>=1000)return`${(n/1000).toFixed(0)}k`;
+  return`${n}`;
+}
+const URG_O = {FLASH:0,PRIORITY:1,ROUTINE:2};
+const URG_SYM = {FLASH:'⚡',PRIORITY:'▲',ROUTINE:'·'};
+
+// ── Data ─────────────────────────────────────────────────────
+const SOCIAL = [
+  {id:'s1',  platform:'twitter', sId:'twitter', handle:'@sama',           content:"we're getting closer to AGI than most people realize. the next 6 months will be unlike anything we've seen before.",                                                  timestamp:ago(3),   urg:'FLASH',    likes:28431, reposts:6821, cat:'models'},
+  {id:'s2',  platform:'linkedin',sId:'linkedin', handle:'Mark Zuckerberg', content:'Llama 4 Scout is out now — open source, 512k context window, topping HumanEval at 92.3%. The open source AI movement is winning.',                                    timestamp:ago(7),   urg:'FLASH',    likes:41230, reposts:8340, cat:'opensource'},
+  {id:'s3',  platform:'twitter', sId:'twitter', handle:'@karpathy',        content:'Llama 4 Scout is genuinely impressive. Open weights, 512k context, beats HumanEval — this raises the floor for what "open source" means. Meta is playing for keeps.',  timestamp:ago(12),  urg:'PRIORITY', likes:8921,  reposts:1876, cat:'models'},
+  {id:'s4',  platform:'linkedin',sId:'linkedin', handle:'Dario Amodei',    content:"Claude 3.7 Sonnet is our most capable model to date. Extended thinking + 200k context enables genuinely new use cases. We're seeing 3x the usage of Sonnet 3.5.",      timestamp:ago(18),  urg:'PRIORITY', likes:22140, reposts:4120, cat:'models'},
+  {id:'s5',  platform:'twitter', sId:'twitter', handle:'@ylecun',          content:'Reminder that all current LLMs (including "reasoning" models) are still fundamentally autocomplete machines. Real AI is elsewhere.',                                   timestamp:ago(24),  urg:'PRIORITY', likes:4532,  reposts:1201, cat:'research'},
+  {id:'s6',  platform:'linkedin',sId:'linkedin', handle:'Jensen Huang',    content:'The AI infrastructure buildout is accelerating. NVIDIA shipped $14B in data center GPUs last quarter. This is the industrial revolution of our time.',                  timestamp:ago(31),  urg:'PRIORITY', likes:58340, reposts:9210, cat:'products'},
+  {id:'s7',  platform:'twitter', sId:'twitter', handle:'@swyx',            content:'Hot take: Claude 3.7 Sonnet with extended thinking is now the best coding model. Beats o3 on SWE-bench for a fraction of the latency.',                                timestamp:ago(38),  urg:'PRIORITY', likes:2341,  reposts:534,  cat:'products'},
+  {id:'s8',  platform:'linkedin',sId:'linkedin', handle:'Satya Nadella',   content:'GitHub Copilot now has 1.8 million paid subscribers. Teams using Copilot complete PRs 55% faster. The ROI is measurable.',                                             timestamp:ago(44),  urg:'PRIORITY', likes:34120, reposts:6230, cat:'products'},
+  {id:'s9',  platform:'twitter', sId:'twitter', handle:'@elonmusk',        content:'Grok 3 achieves the highest GPQA score of any frontier model. Congrats to the xAI team — built in under 2 years.',                                                     timestamp:ago(52),  urg:'PRIORITY', likes:89230, reposts:21430,cat:'models'},
+  {id:'s10', platform:'linkedin',sId:'linkedin', handle:'Fei-Fei Li',      content:'The EU AI Act enforcement begins today. This is a significant moment for AI governance. We need more conversations between researchers, policymakers, and industry.',     timestamp:ago(61),  urg:'ROUTINE',  likes:8120,  reposts:1430, cat:'policy'},
+  {id:'s11', platform:'twitter', sId:'twitter', handle:'@emollick',        content:'New paper: humans with access to frontier AI outperform PhDs without it on complex research tasks by 43%. The "centaur" model (human+AI) is still the most powerful.',   timestamp:ago(73),  urg:'ROUTINE',  likes:5621,  reposts:1241, cat:'research'},
+  {id:'s12', platform:'linkedin',sId:'linkedin', handle:'Greg Brockman',   content:"Back at OpenAI after a sabbatical. Energized and ready. The team has done incredible work — o3, Sora, GPT-4o updates. Excited to build the next chapter.",             timestamp:ago(82),  urg:'ROUTINE',  likes:41230, reposts:7830, cat:'models'},
+  {id:'s13', platform:'twitter', sId:'twitter', handle:'@scaling01',       content:'New eval: MMLU-Pro drops most frontier model scores by 8-12 points. The benchmark treadmill continues. We need harder evals, not better benchmark scores.',             timestamp:ago(95),  urg:'ROUTINE',  likes:1832,  reposts:421,  cat:'research'},
+  {id:'s14', platform:'linkedin',sId:'linkedin', handle:'Mustafa Suleyman',content:"Microsoft Copilot hits 400M monthly active users. AI is no longer a novelty — it's infrastructure. Every knowledge worker will have an AI partner within 18 months.", timestamp:ago(108), urg:'ROUTINE',  likes:18230, reposts:3120, cat:'products'},
+  {id:'s15', platform:'twitter', sId:'twitter', handle:'@GaryMarcus',      content:"OpenAI's $10B raise at $300B valuation is unprecedented. For context: that's 3x the market cap of Boeing.",                                                           timestamp:ago(120), urg:'ROUTINE',  likes:3421,  reposts:876,  cat:'funding'},
+  {id:'s16', platform:'twitter', sId:'twitter', handle:'@simonw',          content:"DeepSeek R2's AIME scores are remarkable for a model of its size. Chinese open-source AI is consistently surprising. The gap is closing faster than expected.",          timestamp:ago(135), urg:'ROUTINE',  likes:2341,  reposts:523,  cat:'models'},
+  {id:'s17', platform:'linkedin',sId:'linkedin', handle:'Reid Hoffman',    content:'The AI investment landscape is bifurcating: infrastructure plays getting institutional capital; application layer remaining fragmented. Exciting decade ahead.',           timestamp:ago(148), urg:'ROUTINE',  likes:11240, reposts:2140, cat:'funding'},
+  {id:'s18', platform:'twitter', sId:'twitter', handle:'@goodside',        content:'Prompt injection attacks on agentic AI systems remain unsolved. As we deploy more autonomous agents, the attack surface grows.',                                         timestamp:ago(163), urg:'ROUTINE',  likes:1832,  reposts:412,  cat:'policy'},
+  {id:'s19', platform:'linkedin',sId:'linkedin', handle:'Susan Li (Meta)', content:"Llama models have been downloaded over 650 million times. Meta's open source bet is paying off at scale.",                                                               timestamp:ago(175), urg:'ROUTINE',  likes:9230,  reposts:1820, cat:'opensource'},
+  {id:'s20', platform:'twitter', sId:'twitter', handle:'@tsarnick',        content:'Hugging Face just crossed 1 million models on the Hub. 6 months ago it was 500k. One new model every 3 minutes.',                                                       timestamp:ago(190), urg:'ROUTINE',  likes:1231,  reposts:287,  cat:'opensource'},
+];
+
+const SRC_C = {
+  'The Verge':'#d4622a','TechCrunch':'#c84818','Bloomberg':'#3870cc',
+  Wired:'#7a9ab0','FT':'#cc8020','NYT Tech':'#bb3030',
+  'GitHub Blog':'#22aa66','Hacker News':'#dd6600','arXiv':'#aa2020',
+  Perplexity:'#5b8dde',
+};
+
+const NEWS = [
+  {id:'n1',  source:'The Verge',  sId:'mainstream',title:'Anthropic ships Claude 3.7 Sonnet with extended thinking mode',                    content:'Anthropic released Claude 3.7 Sonnet with an optional extended thinking mode that dramatically improves reasoning on complex tasks.',                             timestamp:ago(4),   urg:'FLASH',    cat:'models'},
+  {id:'n2',  source:'TechCrunch',  sId:'mainstream',title:"Meta's Llama 4 Scout tops HumanEval at 92.3%, beats closed models",               content:'Meta released Llama 4 Scout under an open license. The model scores 92.3% on HumanEval, outperforming GPT-4o and Claude 3.5 Sonnet.',                          timestamp:ago(9),   urg:'FLASH',    cat:'models'},
+  {id:'n3',  source:'Bloomberg',   sId:'mainstream',title:'OpenAI closes $10B Series F at $300B valuation — largest private tech raise ever', content:'OpenAI raised $10 billion, pushing its valuation to $300 billion. Led by SoftBank Vision Fund with participation from existing investors.',                  timestamp:ago(16),  urg:'FLASH',    cat:'funding'},
+  {id:'n4',  source:'Wired',       sId:'mainstream',title:'Google DeepMind releases Gemini 2.5 Pro with 2 million token context window',      content:'Gemini 2.5 Pro features an unprecedented 2M token context window, enabling processing of entire codebases or hours of video in a single pass.',             timestamp:ago(28),  urg:'PRIORITY', cat:'models'},
+  {id:'n5',  source:'TechCrunch',  sId:'mainstream',title:"xAI's Grok 3 claims top GPQA benchmark score",                                    content:"Grok 3 achieved an 84.6% score on GPQA Diamond, the highest recorded for any frontier model on that evaluation.",                                              timestamp:ago(37),  urg:'PRIORITY', cat:'models'},
+  {id:'n6',  source:'arXiv',       sId:'arxiv',     title:'DeepSeek R2: 78.3% on AIME 2025 with novel chain-of-thought scaling',             content:'DeepSeek researchers publish R2 technical report. The model achieves state-of-the-art on mathematical reasoning benchmarks.',                                   timestamp:ago(49),  urg:'PRIORITY', cat:'research'},
+  {id:'n7',  source:'FT',          sId:'mainstream',title:'EU AI Act enforcement begins — high-risk AI systems face mandatory audits',        content:'The European Union began enforcing the AI Act. Companies using AI in hiring, credit scoring, or critical infrastructure must comply or face fines.',              timestamp:ago(58),  urg:'PRIORITY', cat:'policy'},
+  {id:'n8',  source:'Bloomberg',   sId:'mainstream',title:'Scale AI raises $1B Series F to expand RLHF data operations',                     content:"Scale AI secured $1 billion in new funding to scale its reinforcement learning from human feedback operations amid the model arms race.",                         timestamp:ago(71),  urg:'PRIORITY', cat:'funding'},
+  {id:'n9',  source:'GitHub Blog', sId:'github',    title:'GitHub Copilot X integrates Claude 3.7 for advanced code review',                 content:"GitHub announced Copilot X will use Anthropic's Claude 3.7 Sonnet for code review features, citing superior performance on large codebase tasks.",               timestamp:ago(84),  urg:'PRIORITY', cat:'products'},
+  {id:'n10', source:'Hacker News', sId:'hn',        title:'Ask HN: Quality jump in Claude 3.7 extended thinking?',                           content:'Top HN thread with 847 comments as developers share results. Consensus: meaningful improvement on complex, multi-step reasoning tasks.',                         timestamp:ago(96),  urg:'ROUTINE',  cat:'models'},
+  {id:'n11', source:'Wired',       sId:'mainstream',title:'Hugging Face surpasses 1 million models milestone',                               content:"Hugging Face crossed one million models on its platform. New models are being published at a rate of one per minute.",                                          timestamp:ago(112), urg:'ROUTINE',  cat:'opensource'},
+  {id:'n12', source:'NYT Tech',    sId:'mainstream',title:"OpenAI's GPT-4o real-time voice API now open to all developers",                  content:'OpenAI opened its real-time voice API to all developers, enabling natural spoken conversations at roughly $0.06 per minute.',                                   timestamp:ago(128), urg:'ROUTINE',  cat:'products'},
+  {id:'n13', source:'arXiv',       sId:'arxiv',     title:'MMLU-Pro: A harder benchmark reveals frontier model gaps in expert reasoning',    content:'Researchers release MMLU-Pro. Leading models score 8-12 points lower than on original MMLU, suggesting benchmark saturation.',                                  timestamp:ago(144), urg:'ROUTINE',  cat:'research'},
+  {id:'n14', source:'Perplexity',  sId:'mainstream',title:'Perplexity AI raises $250M Series C for AI-native search',                        content:'Perplexity AI announced $250M at a $3B valuation. The company handles 100M queries per day, up 10x from a year ago.',                                        timestamp:ago(163), urg:'ROUTINE',  cat:'funding'},
+  {id:'n15', source:'arXiv',       sId:'arxiv',     title:'Constitutional AI v2: Anthropic publishes updated alignment framework',           content:'Anthropic releases Constitutional AI version 2, detailing improvements to training helpful, harmless, and honest AI systems.',                                  timestamp:ago(181), urg:'ROUTINE',  cat:'research'},
+];
+
+const LEADERBOARD = [
+  {id:'l1',  rank:1,  name:'GPT-4o',             lab:'OpenAI',    elo:1287, dir:'up',  daysOld:340, ctx:'128k',  mmlu:'88.7', heval:'90.2', notes:'Multimodal flagship'},
+  {id:'l2',  rank:2,  name:'Claude 3.7 Sonnet',  lab:'Anthropic', elo:1278, dir:'up',  daysOld:15,  ctx:'200k',  mmlu:'89.4', heval:'92.1', notes:'Extended thinking'},
+  {id:'l3',  rank:3,  name:'Gemini 2.5 Pro',     lab:'Google',    elo:1271, dir:'up',  daysOld:8,   ctx:'2048k', mmlu:'90.2', heval:'89.8', notes:'2M context window'},
+  {id:'l4',  rank:4,  name:'o3',                 lab:'OpenAI',    elo:1265, dir:'dn',  daysOld:105, ctx:'200k',  mmlu:'91.2', heval:'88.5', notes:'Reasoning specialist'},
+  {id:'l5',  rank:5,  name:'Grok 3',             lab:'xAI',       elo:1243, dir:'up',  daysOld:22,  ctx:'131k',  mmlu:'87.5', heval:'87.1', notes:'GPQA record'},
+  {id:'l6',  rank:6,  name:'Llama 4 Scout',      lab:'Meta',      elo:1218, dir:'up',  daysOld:5,   ctx:'512k',  mmlu:'88.1', heval:'92.3', notes:'Open-source leader'},
+  {id:'l7',  rank:7,  name:'DeepSeek R2',        lab:'DeepSeek',  elo:1201, dir:'up',  daysOld:19,  ctx:'64k',   mmlu:'86.4', heval:'86.8', notes:'Math specialist'},
+  {id:'l8',  rank:8,  name:'Mistral Large 2',    lab:'Mistral',   elo:1189, dir:'dn',  daysOld:161, ctx:'128k',  mmlu:'84.1', heval:'85.2', notes:'Code focus'},
+  {id:'l9',  rank:9,  name:'Claude 3.5 Sonnet',  lab:'Anthropic', elo:1183, dir:'up',  daysOld:198, ctx:'200k',  mmlu:'88.3', heval:'92.0', notes:'Agentic tasks'},
+  {id:'l10', rank:10, name:'Gemini 2.0 Flash',   lab:'Google',    elo:1147, dir:'up',  daysOld:112, ctx:'1024k', mmlu:'86.7', heval:'85.4', notes:'Fast · cheap'},
+  {id:'l11', rank:11, name:'Qwen 2.5-72B',       lab:'Alibaba',   elo:1134, dir:'up',  daysOld:219, ctx:'128k',  mmlu:'83.6', heval:'84.7', notes:'Open-source #2'},
+  {id:'l12', rank:12, name:'GPT-4o mini',        lab:'OpenAI',    elo:1089, dir:'dn',  daysOld:273, ctx:'128k',  mmlu:'82.0', heval:'81.2', notes:'Affordable tier'},
+];
+
+const TRENDING = [
+  {id:'tr1', topic:'Claude 4 release speculation',    score:94, liCt:234, xCt:412, nwCt:201},
+  {id:'tr2', topic:'OpenAI o3 pricing controversy',   score:87, liCt:156, xCt:389, nwCt:167},
+  {id:'tr3', topic:'Llama 4 Scout benchmark results', score:82, liCt:312, xCt:498, nwCt:143},
+  {id:'tr4', topic:'AGI timeline debate',             score:78, liCt:189, xCt:521, nwCt:89},
+  {id:'tr5', topic:'EU AI Act compliance deadlines',  score:71, liCt:410, xCt:213, nwCt:234},
+  {id:'tr6', topic:'Reasoning model arms race',       score:65, liCt:143, xCt:287, nwCt:112},
+  {id:'tr7', topic:'Open source vs closed AI',        score:58, liCt:198, xCt:341, nwCt:78},
+  {id:'tr8', topic:'AI coding assistants comparison', score:52, liCt:267, xCt:189, nwCt:134},
+];
+
+// ── Live data fetching ────────────────────────────────────────
+// News: RSS via rss2json.com (free, no key needed for personal use)
+// Social: Reddit public JSON API (free, no key, no auth required)
+
+const RSS2JSON = 'https://api.rss2json.com/v1/api.json?count=8&rss_url=';
+
+const RSS_SOURCES = [
+  { url:'https://techcrunch.com/category/artificial-intelligence/feed/', source:'TechCrunch',  sId:'mainstream' },
+  { url:'https://www.theverge.com/rss/ai-artificial-intelligence/index.xml', source:'The Verge', sId:'mainstream' },
+  { url:'https://venturebeat.com/category/ai/feed/',                      source:'VentureBeat', sId:'mainstream' },
+  { url:'https://www.wired.com/feed/tag/ai/latest/rss',                   source:'Wired',       sId:'mainstream' },
+  { url:'http://export.arxiv.org/rss/cs.AI',                              source:'arXiv',       sId:'arxiv'      },
+];
+
+function assignCategory(text) {
+  const t = text.toLowerCase();
+  if (/gpt|claude|gemini|llama|mistral|grok|deepseek|qwen|benchmark|leaderboard|arena|frontier model/.test(t)) return 'models';
+  if (/paper|research|arxiv|study|dataset|training|alignment|eval|preprint/.test(t)) return 'research';
+  if (/fund|raise|valuat|billion|million|series [a-f]|invest|acqui|ipo/.test(t)) return 'funding';
+  if (/regulat|policy|law|act|government|congress|eu ai|safety|gdpr|compliance/.test(t)) return 'policy';
+  if (/open.?source|hugging face|github|open weight|open model|apache/.test(t)) return 'opensource';
+  return 'products';
+}
+
+function assignUrgency(title, pubDate) {
+  const ageHrs = (Date.now() - new Date(pubDate).getTime()) / 3600000;
+  const t = title.toLowerCase();
+  const flashWords = /breaking|just in|exclusive|launches|releases|announces|raises|acqui|ipo|shutdown/;
+  if (ageHrs < 3 && flashWords.test(t)) return 'FLASH';
+  if (ageHrs < 18) return 'PRIORITY';
+  return 'ROUTINE';
+}
+
+function stripHtml(html) {
+  return (html || '').replace(/<[^>]*>/g, '').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&#39;/g,"'").replace(/&quot;/g,'"').trim();
+}
+
+async function fetchRSSFeed(src) {
+  const res  = await fetch(RSS2JSON + encodeURIComponent(src.url), {signal: AbortSignal.timeout(7000)});
+  const data = await res.json();
+  if (data.status !== 'ok' || !data.items) return [];
+  return data.items.map((item, i) => ({
+    id:        `live-${src.sId}-${i}-${Date.now()}`,
+    source:    src.source,
+    sId:       src.sId,
+    title:     stripHtml(item.title),
+    content:   stripHtml(item.description).slice(0, 240),
+    url:       item.link,
+    timestamp: new Date(item.pubDate || Date.now()).toISOString(),
+    urg:       assignUrgency(item.title, item.pubDate),
+    cat:       assignCategory(item.title + ' ' + (item.description || '')),
+  }));
+}
+
+async function fetchHN() {
+  const ids  = await fetch('https://hacker-news.firebaseio.com/v0/topstories.json',
+    {signal: AbortSignal.timeout(5000)}).then(r => r.json());
+  const items = await Promise.all(
+    ids.slice(0, 40).map(id =>
+      fetch(`https://hacker-news.firebaseio.com/v0/item/${id}.json`,
+        {signal: AbortSignal.timeout(4000)}).then(r => r.json()).catch(()=>null)
+    )
+  );
+  return items
+    .filter(it => it && it.title && /\bai\b|llm|gpt|claude|gemini|llama|openai|anthropic|deep.?seek|mistral|neural|language model/i.test(it.title))
+    .slice(0, 4)
+    .map((it, i) => ({
+      id:        `hn-${i}-${Date.now()}`,
+      source:    'Hacker News',
+      sId:       'hn',
+      title:     it.title,
+      content:   `${it.score} points · ${it.descendants || 0} comments`,
+      url:       it.url || `https://news.ycombinator.com/item?id=${it.id}`,
+      timestamp: new Date(it.time * 1000).toISOString(),
+      urg:       assignUrgency(it.title, new Date(it.time * 1000)),
+      cat:       assignCategory(it.title),
+    }));
+}
+
+async function fetchAllNews() {
+  const results = await Promise.allSettled([
+    ...RSS_SOURCES.map(fetchRSSFeed),
+    fetchHN(),
+  ]);
+  return results
+    .filter(r => r.status === 'fulfilled')
+    .flatMap(r => r.value)
+    .filter(item => item.title && item.title.length > 5);
+}
+
+// ── Reddit social feed ───────────────────────────────────────
+// Reddit's public .json API requires no key and supports CORS from browsers.
+// Pulling from the highest-signal AI subreddits.
+
+const REDDIT_SUBS = [
+  { sub:'MachineLearning', label:'r/MachineLearning', cat:'research'   },
+  { sub:'LocalLLaMA',      label:'r/LocalLLaMA',      cat:'models'     },
+  { sub:'artificial',      label:'r/artificial',      cat:'products'   },
+  { sub:'singularity',     label:'r/singularity',     cat:'models'     },
+  { sub:'OpenAI',          label:'r/OpenAI',          cat:'products'   },
+];
+
+function redditUrgency(score, createdUtc) {
+  const ageHrs = (Date.now() - createdUtc * 1000) / 3600000;
+  if (score >= 2000 && ageHrs < 12) return 'FLASH';
+  if (score >= 400  || ageHrs < 20) return 'PRIORITY';
+  return 'ROUTINE';
+}
+
+async function fetchSubreddit({sub, label, cat}) {
+  const url = `https://www.reddit.com/r/${sub}/hot.json?limit=12&t=day`;
+  const res  = await fetch(url, {
+    headers:{'Accept':'application/json'},
+    signal: AbortSignal.timeout(7000),
+  });
+  const json = await res.json();
+  return (json?.data?.children || [])
+    .map(c => c.data)
+    .filter(p => p && p.title && !p.stickied && p.score > 10)
+    .slice(0, 4)
+    .map((p, i) => ({
+      id:        `reddit-${sub}-${i}-${p.id}`,
+      platform:  'reddit',
+      sId:       'reddit',
+      sub:       label,
+      handle:    `u/${p.author}`,
+      content:   p.selftext
+        ? p.selftext.replace(/\n+/g,' ').trim().slice(0, 220) + (p.selftext.length > 220 ? '…' : '')
+        : p.title,
+      title:     p.title,
+      url:       p.url,
+      permalink: `https://reddit.com${p.permalink}`,
+      timestamp: new Date(p.created_utc * 1000).toISOString(),
+      urg:       redditUrgency(p.score, p.created_utc),
+      likes:     p.score,
+      reposts:   p.num_comments,
+      cat:       assignCategory(p.title + ' ' + (p.selftext || '')),
+    }));
+}
+
+async function fetchAllReddit() {
+  const results = await Promise.allSettled(REDDIT_SUBS.map(fetchSubreddit));
+  const posts = results
+    .filter(r => r.status === 'fulfilled')
+    .flatMap(r => r.value);
+  // Dedupe by title similarity, sort by score then recency
+  const seen = new Set();
+  return posts
+    .filter(p => { const k = p.title.slice(0,40).toLowerCase(); if(seen.has(k))return false; seen.add(k); return true; })
+    .sort((a,b) => (URG_O[a.urg]??2)-(URG_O[b.urg]??2) || b.likes - a.likes);
+}
+
+// ── Filter ────────────────────────────────────────────────────
+function applyF(items, f, sourceKey) {
+  let o = items;
+  if (f.sources.length)    o = o.filter(i => f.sources.includes(i[sourceKey]));
+  if (f.categories.length) o = o.filter(i => f.categories.includes(i.cat));
+  if (f.urgency.length)    o = o.filter(i => f.urgency.includes(i.urg));
+  if (f.q) {
+    const q = f.q.toLowerCase();
+    o = o.filter(i => (i.title||'').toLowerCase().includes(q)||(i.content||'').toLowerCase().includes(q)||(i.handle||'').toLowerCase().includes(q));
+  }
+  return o;
+}
+
+// ── Components ────────────────────────────────────────────────
+function SocialPost({post, kws}) {
+  const isLI = post.platform === 'linkedin';
+  return (
+    <div className={`sp${post.urg==='FLASH'?' fl':post.urg==='PRIORITY'?' pr':''}`}>
+      <div className="sp-top">
+        <span className={`sp-plat ${isLI?'li':'x'}`}>{isLI?'LI':'X'}</span>
+        <span className="sp-handle">{post.handle}</span>
+        <span className="sp-time">{timeAgo(post.timestamp)}</span>
+      </div>
+      <div className="sp-body"><Hl text={post.content} kws={kws}/></div>
+      <div className="sp-foot">
+        <span className="sp-eng">♥ {fmtNum(post.likes)}</span>
+        <span className="sp-eng" style={{color:'var(--td)'}}>↺ {fmtNum(post.reposts)}</span>
+        <span className="sp-tag">{post.cat}</span>
+      </div>
+    </div>
+  );
+}
+
+// ── Social Post — handles Reddit + legacy LI/X demo posts ────
+// (Overrides the earlier SocialPost definition)
+function SocialPost({post, kws}) {
+  const isReddit = post.platform === 'reddit';
+  const isLI     = post.platform === 'linkedin';
+  const urgCls   = post.urg==='FLASH'?' fl':post.urg==='PRIORITY'?' pr':'';
+
+  // Reddit badge style
+  const badge = isReddit
+    ? <span className="sp-plat" style={{color:'#ff6314',background:'rgba(255,99,20,.12)',border:'1px solid rgba(255,99,20,.3)',fontSize:7,fontWeight:700,letterSpacing:'.06em',padding:'2px 5px'}}>{post.sub}</span>
+    : <span className={`sp-plat ${isLI?'li':'x'}`}>{isLI?'LI':'X'}</span>;
+
+  return (
+    <div className={`sp${urgCls}`} onClick={()=>post.permalink&&window.open(post.permalink,'_blank')}>
+      <div className="sp-top">
+        {badge}
+        <span className="sp-handle" style={{fontSize:9}}>{post.handle}</span>
+        <span className="sp-time">{timeAgo(post.timestamp)}</span>
+      </div>
+      {isReddit && post.title !== post.content &&
+        <div style={{fontSize:11,fontWeight:600,color:'var(--tp)',lineHeight:1.4,marginBottom:5}}>
+          <Hl text={post.title} kws={kws}/>
+        </div>
+      }
+      <div className="sp-body"><Hl text={post.content} kws={kws}/></div>
+      <div className="sp-foot">
+        <span className="sp-eng">▲ {fmtNum(post.likes)}</span>
+        <span className="sp-eng" style={{color:'var(--td)'}}>💬 {fmtNum(post.reposts)}</span>
+        <span className="sp-tag">{post.cat}</span>
+      </div>
+    </div>
+  );
+}
+
+// ── News wire: three-tier hierarchy ─────────────────────────
+
+// Tier 1 — Lead story: largest card, full 3-line body, bold headline
+function LeadNewsItem({item, kws}) {
+  const mk  = matchedKws(item, kws);
+  const uc  = item.urg==='FLASH'?'fl':item.urg==='PRIORITY'?'pr':'rt';
+  return (
+    <div className={`ni-lead ${uc}`}>
+      <div className="ni-top">
+        <span className={`ni-urg urg-${uc}`}>{URG_SYM[item.urg]}</span>
+        <span className="ni-src" style={{color:SRC_C[item.source]||'var(--tl)'}}>{item.source}</span>
+        <span className="ni-cat">· {item.cat}</span>
+        {mk.length>0&&<span style={{fontSize:8,color:'var(--pri)',marginLeft:4}}>⚑</span>}
+        <span className="ni-time">{timeAgo(item.timestamp)}</span>
+      </div>
+      <div className="ni-title"><Hl text={item.title} kws={kws}/></div>
+      <div className="ni-body"><Hl text={item.content} kws={kws}/></div>
+    </div>
+  );
+}
+
+// Tier 2 — Featured story: medium card, 2-line body
+function FeatNewsItem({item, kws}) {
+  const mk  = matchedKws(item, kws);
+  const uc  = item.urg==='FLASH'?'fl':item.urg==='PRIORITY'?'pr':'rt';
+  return (
+    <div className={`ni-feat ${uc}`}>
+      <div className="ni-top">
+        <span className={`ni-urg urg-${uc}`}>{URG_SYM[item.urg]}</span>
+        <span className="ni-src" style={{color:SRC_C[item.source]||'var(--tl)'}}>{item.source}</span>
+        <span className="ni-cat">· {item.cat}</span>
+        {mk.length>0&&<span style={{fontSize:8,color:'var(--pri)',marginLeft:4}}>⚑</span>}
+        <span className="ni-time">{timeAgo(item.timestamp)}</span>
+      </div>
+      <div className="ni-title"><Hl text={item.title} kws={kws}/></div>
+      <div className="ni-body"><Hl text={item.content} kws={kws}/></div>
+    </div>
+  );
+}
+
+// Tier 3 — Compact story: single-line scannable row, no body text
+function CompactNewsItem({item, kws}) {
+  const uc = item.urg==='FLASH'?'fl':item.urg==='PRIORITY'?'pr':'rt';
+  return (
+    <div className={`ni-compact ${uc}`}>
+      <span className={`ni-urg urg-${uc}`}>{URG_SYM[item.urg]}</span>
+      <span className="ni-src" style={{color:SRC_C[item.source]||'var(--ts)'}}>{item.source}</span>
+      <span className="ni-title"><Hl text={item.title} kws={kws}/></span>
+      <span className="ni-time">{timeAgo(item.timestamp)}</span>
+    </div>
+  );
+}
+
+// Legacy NewsItem kept for any other use
+function NewsItem({item, kws}) {
+  const mk  = matchedKws(item, kws);
+  const uc  = item.urg==='FLASH'?'fl':item.urg==='PRIORITY'?'pr':'rt';
+  return (
+    <div className={`ni${item.urg==='FLASH'?' fl':item.urg==='PRIORITY'?' pr':''}${mk.length?' kw':''}`}>
+      <div className="ni-top">
+        <span className={`ni-urg ${uc}`}>{URG_SYM[item.urg]}</span>
+        <span className="ni-src" style={{color:SRC_C[item.source]||'var(--tl)'}}>{item.source}</span>
+        <span className="ni-cat">· {item.cat}</span>
+        {mk.length>0&&<span style={{fontSize:8,color:'var(--pri)',marginLeft:4}}>⚑</span>}
+        <span className="ni-time">{timeAgo(item.timestamp)}</span>
+      </div>
+      <div className="ni-title"><Hl text={item.title} kws={kws}/></div>
+      <div className="ni-body"><Hl text={item.content} kws={kws}/></div>
+    </div>
+  );
+}
+
+function ModelRankItem({m}) {
+  return (
+    <div className="mr">
+      <span className={`mr-rank${m.rank<=3?' top':''}`}>#{m.rank}</span>
+      <div className="mr-info">
+        <div className="mr-name">
+          {m.name}
+          {m.daysOld<=30&&<span className="mr-new">NEW</span>}
+        </div>
+        <div className="mr-lab">{m.lab}</div>
+      </div>
+      <span className="mr-elo">{m.elo}</span>
+      <span className={`mr-dir ${m.dir}`}>{m.dir==='up'?'▲':'▼'}</span>
+    </div>
+  );
+}
+
+function TrendItem({t, maxScore}) {
+  const pct = Math.round((t.score / maxScore) * 100);
+  return (
+    <div className="tr">
+      <div className="tr-top">
+        <span className="tr-rank">#{t.id.replace('tr','')}</span>
+        <span className="tr-name">{t.topic}</span>
+        <span className="tr-score">{t.score}</span>
+      </div>
+      <div className="tr-bar"><div className="tr-fill" style={{width:`${pct}%`}}/></div>
+      <div className="tr-foot">
+        <span><span className="tr-src-badge li">LI</span> {t.liCt}</span>
+        <span><span className="tr-src-badge x">X</span> {t.xCt}</span>
+        <span><span className="tr-src-badge nw">NEWS</span> {t.nwCt}</span>
+      </div>
+    </div>
+  );
+}
+
+function ModelsOverlay({onClose}) {
+  return (
+    <div className="models-overlay">
+      <div className="moh">
+        <span className="moh-title">Model Comparison — Frontier AI Systems</span>
+        <button className="btn" onClick={onClose} style={{color:'var(--td)'}}>close [esc]</button>
+      </div>
+      <div className="mo-wrap">
+        <table className="mt">
+          <thead>
+            <tr>
+              <th>#</th><th>Model</th><th>Lab</th><th>Age</th>
+              <th>Context</th><th>MMLU</th><th>HumanEval</th><th>Arena ELO</th><th>↕</th><th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            {LEADERBOARD.map(m=>(
+              <tr key={m.id}>
+                <td className="mt-rank">{m.rank}</td>
+                <td><span className="mt-model">{m.name}</span>{m.daysOld<=30&&<span className="mt-new">NEW</span>}</td>
+                <td className="mt-lab">{m.lab}</td>
+                <td style={{color:'var(--td)',fontSize:9}}>{m.daysOld}d</td>
+                <td style={{color:'var(--ts)',fontSize:9}}>{m.ctx}</td>
+                <td className="mt-num">{m.mmlu}</td>
+                <td className="mt-num">{m.heval}</td>
+                <td className="mt-elo">{m.elo}</td>
+                <td><span className={`mt-dir ${m.dir}`}>{m.dir==='up'?'▲':'▼'}</span></td>
+                <td className="mt-note">{m.notes}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <div className="mt-legend">
+          <span>Arena ELO — lmsys.org community votes</span>
+          <span>MMLU — Multitask Language Understanding (0–100)</span>
+          <span>HumanEval — Python code generation pass@1 (%)</span>
+          <span style={{color:'var(--td)'}}>Demo mode — scores are illustrative</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function WatchlistModal({wl, onAdd, onRemove, onClose}) {
+  const [inp, setInp] = useState('');
+  const ref = useRef();
+  useEffect(()=>ref.current?.focus(),[]);
+  const add = ()=>{const k=inp.trim();if(k){onAdd(k);setInp('');ref.current?.focus();}};
+  return (
+    <div className="mo" onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="mo-box">
+        <div className="mo-title">Keyword Watchlist</div>
+        <div className="wl-tags">
+          {!wl.length&&<span style={{fontSize:9,color:'var(--td)'}}>No keywords yet</span>}
+          {wl.map(k=><span key={k} className="wl-tag">{k}<button onClick={()=>onRemove(k)}>×</button></span>)}
+        </div>
+        <div className="mo-row">
+          <input ref={ref} className="mo-in" placeholder="Add keyword (GPT-5, Claude 4, AGI)..." value={inp}
+            onChange={e=>setInp(e.target.value)}
+            onKeyDown={e=>{if(e.key==='Enter')add();if(e.key==='Escape')onClose();}}
+            spellCheck={false}/>
+          <button className="mo-btn mo-add" onClick={add}>Add</button>
+        </div>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+          <div className="mo-hint">Matched keywords highlight across all panels. Saved to localStorage.</div>
+          <button className="mo-btn mo-cls" onClick={onClose} style={{marginLeft:10}}>Close</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── App ───────────────────────────────────────────────────────
+const DEFAULT_WL = ['GPT-5','Claude 4','Gemini 3','AGI','reasoning model','o4'];
+
+// Extended source colors for live feeds
+Object.assign(SRC_C, {
+  VentureBeat:'#7b5ea7', 'MIT Tech Review':'#a00000',
+  'Hacker News':'#dd6600', arXiv:'#b52020',
+});
+
+function App() {
+  const [clock,      setClock]      = useState('');
+  const [focused,    setFocused]    = useState('center');
+  const [showWl,     setShowWl]     = useState(false);
+  const [showModels, setShowModels] = useState(false);
+  // 'loading' → fetching  |  'live' → real data loaded  |  'demo' → fallback
+  const [dataStatus,   setDataStatus]   = useState('loading');
+  const [newsData,     setNewsData]     = useState(NEWS);
+  const [socialData,   setSocialData]   = useState(SOCIAL); // starts as curated demo
+  const [wl, setWl] = useState(()=>{
+    try{const s=localStorage.getItem('cx2_wl');return s?JSON.parse(s):DEFAULT_WL;}catch{return DEFAULT_WL;}
+  });
+  const [f, setF] = useState({sources:[],categories:[],urgency:[],q:''});
+
+  useEffect(()=>{
+    const tick=()=>{const n=new Date();setClock(n.toISOString().replace('T',' ').slice(0,19)+'Z');};
+    tick();const id=setInterval(tick,1000);return()=>clearInterval(id);
+  },[]);
+
+  // Fetch live news + Reddit on mount; refresh every 10 minutes
+  useEffect(()=>{
+    let cancelled = false;
+    const load = async () => {
+      // Run news and Reddit fetches in parallel
+      const [newsResult, redditResult] = await Promise.allSettled([
+        fetchAllNews(),
+        fetchAllReddit(),
+      ]);
+      if (cancelled) return;
+
+      let anyLive = false;
+
+      if (newsResult.status==='fulfilled' && newsResult.value.length >= 3) {
+        const items = newsResult.value;
+        items.sort((a,b)=>(URG_O[a.urg]??2)-(URG_O[b.urg]??2)||(new Date(b.timestamp)-new Date(a.timestamp)));
+        setNewsData(items);
+        anyLive = true;
+      }
+
+      if (redditResult.status==='fulfilled' && redditResult.value.length >= 3) {
+        setSocialData(redditResult.value);
+        anyLive = true;
+      }
+
+      setDataStatus(anyLive ? 'live' : 'demo');
+    };
+    load();
+    const interval = setInterval(load, 10 * 60 * 1000);
+    return () => { cancelled = true; clearInterval(interval); };
+  },[]);
+
+  useEffect(()=>{
+    const h=e=>{
+      const tag=document.activeElement?.tagName;
+      if(tag==='INPUT'||tag==='TEXTAREA')return;
+      const sc=(p,a)=>document.getElementById(`pc-${p}`)?.scrollBy({top:a,behavior:'smooth'});
+      if(e.key==='1'){e.preventDefault();setFocused('left');}
+      if(e.key==='2'){e.preventDefault();setFocused('center');}
+      if(e.key==='3'){e.preventDefault();setFocused('right');}
+      if(e.key==='j'){e.preventDefault();sc(focused,120);}
+      if(e.key==='k'){e.preventDefault();sc(focused,-120);}
+      if(e.key==='/'||e.key==='f'){e.preventDefault();document.getElementById('fsrch')?.focus();}
+      if(e.key==='w'){e.preventDefault();setShowWl(v=>!v);}
+      if(e.key==='m'){e.preventDefault();if(!showWl)setShowModels(v=>!v);}
+      if(e.key==='Escape'){e.preventDefault();setShowWl(false);setShowModels(false);setF(x=>({...x,q:''}));document.activeElement?.blur();}
+    };
+    window.addEventListener('keydown',h);return()=>window.removeEventListener('keydown',h);
+  },[focused,showWl]);
+
+  const addKw = k=>{const kw=k.trim();if(!kw)return;setWl(prev=>{if(prev.some(x=>x.toLowerCase()===kw.toLowerCase()))return prev;const n=[...prev,kw];localStorage.setItem('cx2_wl',JSON.stringify(n));return n;});};
+  const rmKw  = k=>setWl(prev=>{const n=prev.filter(x=>x!==k);localStorage.setItem('cx2_wl',JSON.stringify(n));return n;});
+  const tog   = (key,val)=>setF(x=>({...x,[key]:x[key].includes(val)?x[key].filter(y=>y!==val):[...x[key],val]}));
+
+  const fSocial  = useMemo(()=>applyF(socialData,f,'sId'),[f, socialData]);
+  // Use live newsData (starts as demo NEWS, swaps to live once fetched)
+  const fNews    = useMemo(()=>[...applyF(newsData,f,'sId')].sort((a,b)=>(URG_O[a.urg]??2)-(URG_O[b.urg]??2)||(new Date(b.timestamp)-new Date(a.timestamp))),[f, newsData]);
+  // Featured = top 3 items (sort already puts FLASH then PRIORITY first)
+  const featNews    = fNews.slice(0, 3);
+  const compactNews = fNews.slice(3);
+  const flashCt  = fNews.filter(n=>n.urg==='FLASH').length + fSocial.filter(s=>s.urg==='FLASH').length;
+  const active   = f.sources.length||f.categories.length||f.urgency.length||f.q;
+  const maxTrend = Math.max(...TRENDING.map(t=>t.score));
+
+  const PanelDot = ()=><div className="ph-dot"/>;
+
+  return (
+    <div className="app">
+
+      {/* HEADER */}
+      <div className="hdr">
+        <div className="hdr-left">
+          <span className="hdr-title">CORTEX</span>
+          <span className="hdr-badge">AI INTELLIGENCE</span>
+          <div className="demo-pill">
+            <div className="demo-dot" style={{
+              background: dataStatus==='live' ? 'var(--pri)' : dataStatus==='loading' ? 'var(--ts)' : 'var(--cM)',
+            }}/>
+            <span>{dataStatus==='live' ? 'live' : dataStatus==='loading' ? 'connecting…' : 'demo'}</span>
+            {dataStatus==='live' && <span style={{color:'var(--td)',fontSize:8}}>· social: curated</span>}
+          </div>
+        </div>
+        <div className="hdr-right">
+          {flashCt>0&&<span className="flash-pill">⚡ {flashCt} flash</span>}
+          <span className="hdr-clock">{clock}</span>
+          <button className={`btn primary${showModels?' on':''}`} onClick={()=>setShowModels(v=>!v)}>Models</button>
+          <button className="btn accent" onClick={()=>setShowWl(v=>!v)}>Watchlist</button>
+        </div>
+      </div>
+
+      {/* FILTER BAR */}
+      <div className="fbar">
+        {[
+          {id:'reddit',l:'Reddit'},{id:'mainstream',l:'News'},
+          {id:'github',l:'GitHub'},{id:'arxiv',l:'arXiv'},{id:'hn',l:'HN'},
+        ].map(s=>(
+          <button key={s.id} className={`chip${f.sources.includes(s.id)?' on':''}`} onClick={()=>tog('sources',s.id)}>{s.l}</button>
+        ))}
+        <div className="fdiv"/>
+        {[
+          {id:'models',l:'Models'},{id:'research',l:'Research'},{id:'products',l:'Products'},
+          {id:'funding',l:'Funding'},{id:'policy',l:'Policy'},{id:'opensource',l:'Open Source'},
+        ].map(c=>(
+          <button key={c.id} className={`chip${f.categories.includes(c.id)?' on':''}`} onClick={()=>tog('categories',c.id)}>{c.l}</button>
+        ))}
+        <div className="fdiv"/>
+        {[['FLASH','fl'],['PRIORITY','pr'],['ROUTINE','']].map(([u,c])=>(
+          <button key={u} className={`chip${f.urgency.includes(u)?' on '+(c||''):''}`} onClick={()=>tog('urgency',u)}>{u.toLowerCase()}</button>
+        ))}
+        <div className="fdiv"/>
+        <input id="fsrch" className="fsrch" placeholder="search..." value={f.q}
+          onChange={e=>setF(x=>({...x,q:e.target.value}))}
+          onKeyDown={e=>e.key==='Escape'&&setF(x=>({...x,q:''}))}
+          spellCheck={false}/>
+        {active>0&&<button className="chip" style={{color:'var(--pri)',borderColor:'var(--priD)',flexShrink:0}} onClick={()=>setF({sources:[],categories:[],urgency:[],q:''})}>✕ clear</button>}
+      </div>
+
+      {/* PANELS */}
+      <div className="panels" style={{flex:'1 1 0',minHeight:0}}>
+
+        {/* LEFT — SOCIAL */}
+        <div className={`panel${focused==='left'?' focused':''}`} onClick={()=>setFocused('left')}>
+          <div className="ph">
+            <span className="ph-title">Reddit Signal</span>
+            <div className="ph-meta">
+              {fSocial.filter(s=>s.urg==='FLASH').length>0&&<span style={{color:'var(--fla)',animation:'blink 1.4s step-end infinite',fontSize:10,fontWeight:700}}>⚡ {fSocial.filter(s=>s.urg==='FLASH').length}</span>}
+              <PanelDot/><span>{fSocial.length} posts</span>
+            </div>
+          </div>
+          <div id="pc-left" className="pc">
+            {fSocial.length===0
+              ? <div style={{padding:'24px',textAlign:'center',fontSize:10,color:'var(--td)'}}>No results</div>
+              : fSocial.map(p=><SocialPost key={p.id} post={p} kws={wl}/>)}
+          </div>
+        </div>
+
+        {/* CENTER — NEWS WIRE with three-tier hierarchy */}
+        <div className={`panel${focused==='center'?' focused':''}`} onClick={()=>setFocused('center')}>
+          <div className="ph">
+            <span className="ph-title">AI Wire</span>
+            <div className="ph-meta">
+              {fNews.filter(n=>n.urg==='FLASH').length>0&&<span style={{color:'var(--fla)',animation:'blink 1.4s step-end infinite',fontSize:10,fontWeight:700}}>⚡ {fNews.filter(n=>n.urg==='FLASH').length} flash</span>}
+              <PanelDot/><span>{fNews.length} stories</span>
+            </div>
+          </div>
+          <div id="pc-center" className="pc">
+            {dataStatus==='loading' ? (
+              // Loading skeleton — 3 ghost cards
+              [1,2,3].map(i=>(
+                <div key={i} style={{padding: i===1?'20px 18px':'14px 18px', borderBottom:'1px solid var(--brH)', opacity:.5-i*.1}}>
+                  <div style={{height:8,width:120,background:'var(--brH)',borderRadius:2,marginBottom:10}}/>
+                  <div style={{height: i===1?20:14,width:'90%',background:'var(--brH)',borderRadius:2,marginBottom:8}}/>
+                  {i===1&&<div style={{height:14,width:'80%',background:'var(--br)',borderRadius:2,marginBottom:6}}/>}
+                  <div style={{height:10,width:'70%',background:'var(--br)',borderRadius:2}}/>
+                </div>
+              ))
+            ) : fNews.length===0 ? (
+              <div style={{padding:'24px',textAlign:'center',fontSize:11,color:'var(--ts)'}}>No results</div>
+            ) : (<>
+              {/* Tier 1 — lead story */}
+              {featNews[0] && <LeadNewsItem item={featNews[0]} kws={wl}/>}
+              {/* Tier 2 — supporting featured */}
+              {featNews.slice(1).map(n=><FeatNewsItem key={n.id} item={n} kws={wl}/>)}
+              {/* Divider */}
+              {compactNews.length>0 && (
+                <div className="wire-divider">More stories — {compactNews.length}</div>
+              )}
+              {/* Tier 3 — compact list */}
+              {compactNews.map(n=><CompactNewsItem key={n.id} item={n} kws={wl}/>)}
+            </>)}
+          </div>
+        </div>
+
+        {/* RIGHT — MODEL WATCH */}
+        <div className={`panel${focused==='right'?' focused':''}`} onClick={()=>setFocused('right')}>
+          <div className="ph">
+            <span className="ph-title">Model Watch</span>
+            <div className="ph-meta"><span>{LEADERBOARD.length} models</span></div>
+          </div>
+          <div id="pc-right" className="pc">
+            <div className="sec-div"><span>Arena ELO Leaderboard</span><span>{LEADERBOARD.length}</span></div>
+            {LEADERBOARD.map(m=><ModelRankItem key={m.id} m={m}/>)}
+            <div className="sec-div" style={{marginTop:4}}><span>Trending Topics</span><span>{TRENDING.length}</span></div>
+            {TRENDING.map(t=><TrendItem key={t.id} t={t} maxScore={maxTrend}/>)}
+          </div>
+        </div>
+
+      </div>
+
+      {/* STATUS BAR */}
+      <div className="sbar">
+        <div className="sbar-sc">
+          {[['j/k','scroll'],['1/2/3','panel'],['/',  'search'],['w','watchlist'],['m','models'],['esc','clear']].map(([k,d])=>(
+            <span key={k} style={{display:'flex',alignItems:'center',gap:4}}><kbd>{k}</kbd>{d}</span>
+          ))}
+        </div>
+        <div style={{display:'flex',gap:6,color:'var(--td)'}}>
+          {['left','center','right'].map((p,i)=>(
+            <span key={p} style={{color:focused===p?'var(--cM)':'var(--td)'}}>[{i+1}] {p==='left'?'social':p==='center'?'wire':'watch'}</span>
+          ))}
+        </div>
+        <div style={{display:'flex',gap:10,color:'var(--td)'}}>
+          <span>N:{fNews.length}</span><span>S:{fSocial.length}</span><span>M:{LEADERBOARD.length}</span>
+        </div>
+      </div>
+
+      {showModels&&<ModelsOverlay onClose={()=>setShowModels(false)}/>}
+      {showWl&&<WatchlistModal wl={wl} onAdd={addKw} onRemove={rmKw} onClose={()=>setShowWl(false)}/>}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
