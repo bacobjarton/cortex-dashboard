@@ -87,6 +87,16 @@ body {
 @keyframes slideIn  { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
 @keyframes fadeIn   { from{opacity:0} to{opacity:1} }
 @keyframes shimmer  { 0%{opacity:.4} 60%{opacity:.7} 100%{opacity:.4} }
+@keyframes spin     { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+.spin { display:inline-block; animation:spin .7s linear infinite }
+.refresh-btn {
+  background:none; border:none; cursor:pointer;
+  color:var(--td); font-size:15px; padding:2px 5px;
+  border-radius:var(--r-xs); transition:color .15s, background .15s;
+  line-height:1; flex-shrink:0;
+}
+.refresh-btn:hover   { color:var(--ts); background:var(--fill2) }
+.refresh-btn:disabled{ cursor:default; opacity:.4 }
 
 .app { display:flex; flex-direction:column; height:100vh; overflow:hidden }
 
@@ -1230,6 +1240,9 @@ function App() {
   const [dataStatus,   setDataStatus]   = useState('loading');
   const [newsData,     setNewsData]     = useState(NEWS);
   const [socialData,   setSocialData]   = useState(SOCIAL); // starts as curated demo
+  const [refreshKey,   setRefreshKey]   = useState(0);       // increment to trigger re-fetch
+  const [refreshing,   setRefreshing]   = useState(false);   // manual refresh in-flight
+  const [lastFetched,  setLastFetched]  = useState(null);    // timestamp of last successful fetch
   const [wl, setWl] = useState(()=>{
     try{const s=localStorage.getItem('cx2_wl');return s?JSON.parse(s):DEFAULT_WL;}catch{return DEFAULT_WL;}
   });
@@ -1240,11 +1253,14 @@ function App() {
     tick();const id=setInterval(tick,1000);return()=>clearInterval(id);
   },[]);
 
-  // Fetch live news + Reddit on mount; refresh every 10 minutes
+  // Fetch live news + Reddit — runs on mount and whenever refreshKey changes
   useEffect(()=>{
     let cancelled = false;
+    // On first load: show loading skeleton; on manual refresh: keep old data visible
+    if (refreshKey === 0) setDataStatus('loading');
+    else setRefreshing(true);
+
     const load = async () => {
-      // Run news and Reddit fetches in parallel
       const [newsResult, redditResult] = await Promise.allSettled([
         fetchAllNews(),
         fetchAllReddit(),
@@ -1266,11 +1282,13 @@ function App() {
       }
 
       setDataStatus(anyLive ? 'live' : 'demo');
+      setRefreshing(false);
+      if (anyLive) setLastFetched(new Date());
     };
     load();
     const interval = setInterval(load, 10 * 60 * 1000);
     return () => { cancelled = true; clearInterval(interval); };
-  },[]);
+  },[refreshKey]);
 
   useEffect(()=>{
     const h=e=>{
@@ -1319,7 +1337,11 @@ function App() {
               background: dataStatus==='live' ? 'var(--pri)' : dataStatus==='loading' ? 'var(--ts)' : 'var(--cM)',
             }}/>
             <span>{dataStatus==='live' ? 'live' : dataStatus==='loading' ? 'connecting…' : 'demo'}</span>
-            {dataStatus==='live' && <span style={{color:'var(--td)',fontSize:11}}>· social: reddit</span>}
+            {dataStatus==='live'
+              ? <span style={{color:'var(--td)',fontSize:11}}>· live · links go to articles</span>
+              : dataStatus==='demo'
+              ? <span style={{color:'var(--td)',fontSize:11}}>· demo · links go to publication homepages</span>
+              : null}
           </div>
         </div>
         <div className="hdr-right">
@@ -1383,7 +1405,14 @@ function App() {
             <span className="ph-title">AI Wire</span>
             <div className="ph-meta">
               {fNews.filter(n=>n.urg==='FLASH').length>0&&<span style={{color:'var(--fla)',animation:'blink 1.4s step-end infinite',fontSize:11,fontWeight:700}}>⚡ {fNews.filter(n=>n.urg==='FLASH').length} flash</span>}
-              <PanelDot/><span>{fNews.length} stories</span>
+              <PanelDot/>
+              <span>{Math.min(featNews.length, 3)} of {fNews.length} stories</span>
+              <button
+                className="refresh-btn"
+                onClick={e=>{e.stopPropagation();setRefreshKey(k=>k+1);}}
+                disabled={refreshing || dataStatus==='loading'}
+                title={lastFetched ? `Last updated ${timeAgo(lastFetched.toISOString())} ago — click to refresh` : 'Refresh stories'}
+              ><span className={refreshing?'spin':''}> ↺</span></button>
               <InfoButton info={PANEL_INFO.center}/>
             </div>
           </div>
