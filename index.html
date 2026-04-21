@@ -344,6 +344,9 @@ body {
   letter-spacing:.06em; text-transform:uppercase; color:var(--tl);
 }
 .wire-divider::after { content:''; flex:1; height:1px; background:var(--br) }
+/* When wire-divider has an InfoButton, suppress ::after and use explicit .wire-sep instead */
+.wire-divider.has-info::after { display:none }
+.wire-sep { flex:1; height:1px; background:var(--br) }
 
 /* TIER 3 — Compact list rows */
 .ni-compact {
@@ -577,16 +580,17 @@ table.mt tr:hover td { background:rgba(44,44,46,.5) }
   background:var(--fill1); color:var(--tp); border-color:var(--brH);
 }
 .info-panel {
-  position:absolute; top:calc(100% + 10px); right:0; z-index:400;
+  /* Portal-rendered: position:fixed + top/right set inline by JS */
+  position:fixed; z-index:9999;
   background:var(--bg2); border:1px solid var(--brH);
   border-radius:var(--r); padding:16px;
-  width:min(290px, calc(100vw - 48px));
-  box-shadow:0 16px 48px rgba(0,0,0,.8);
+  width:min(290px, calc(100vw - 32px));
+  box-shadow:0 16px 48px rgba(0,0,0,.85);
   animation:slideIn .15s ease-out;
 }
-/* caret arrow */
+/* caret arrow — points up at the button */
 .info-panel::before {
-  content:''; position:absolute; right:12px; top:-5px;
+  content:''; position:absolute; right:10px; top:-5px;
   width:9px; height:9px; background:var(--bg2);
   border-left:1px solid var(--brH); border-top:1px solid var(--brH);
   transform:rotate(45deg);
@@ -1125,33 +1129,60 @@ const PANEL_INFO = {
 };
 
 function InfoButton({info}) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef();
-  useEffect(()=>{
-    if(!open) return;
-    const h = e => { if(!ref.current?.contains(e.target)) setOpen(false); };
-    document.addEventListener('mousedown', h, true);
-    return () => document.removeEventListener('mousedown', h, true);
-  },[open]);
+  const [open,     setOpen]     = useState(false);
+  const [popStyle, setPopStyle] = useState({});
+  const btnRef = useRef();
+
+  const toggle = e => {
+    e.stopPropagation();
+    if (!open && btnRef.current) {
+      const r  = btnRef.current.getBoundingClientRect();
+      const vw = window.innerWidth;
+      const tw = Math.min(290, vw - 32);
+      // right-align popup to button, clamped so it never leaves the viewport
+      const rightEdge = Math.max(8, vw - r.right);
+      setPopStyle({ top: r.bottom + 8, right: rightEdge, width: tw });
+    }
+    setOpen(v => !v);
+  };
+
+  useEffect(() => {
+    if (!open) return;
+    const close = e => { if (!btnRef.current?.contains(e.target)) setOpen(false); };
+    const dismiss = () => setOpen(false);
+    document.addEventListener('mousedown', close, true);
+    window.addEventListener('scroll', dismiss, true);
+    window.addEventListener('resize', dismiss);
+    return () => {
+      document.removeEventListener('mousedown', close, true);
+      window.removeEventListener('scroll', dismiss, true);
+      window.removeEventListener('resize', dismiss);
+    };
+  }, [open]);
+
+  // Portal: renders into document.body so it escapes any overflow:hidden parent
+  const popup = open && ReactDOM.createPortal(
+    <div className="info-panel" style={popStyle}>
+      <div className="info-panel-title">{info.title}</div>
+      <div className="info-panel-desc">{info.description}</div>
+      <div className="info-panel-lbl">Data sources</div>
+      <div className="info-panel-srcs">
+        {info.sources.map(s => <span key={s} className="info-panel-src">{s}</span>)}
+      </div>
+      <div style={{marginTop:10,fontSize:11,color:'var(--tl)',fontFamily:'var(--mono)'}}>⟳ {info.update}</div>
+    </div>,
+    document.body
+  );
+
   return (
-    <div className="info-wrap" ref={ref}>
+    <div className="info-wrap" ref={btnRef}>
       <button
         className={`info-btn${open?' open':''}`}
-        onClick={e=>{ e.stopPropagation(); setOpen(v=>!v); }}
+        onClick={toggle}
         aria-label="About this panel"
         title="About this panel"
       >ⓘ</button>
-      {open&&(
-        <div className="info-panel">
-          <div className="info-panel-title">{info.title}</div>
-          <div className="info-panel-desc">{info.description}</div>
-          <div className="info-panel-lbl">Data sources</div>
-          <div className="info-panel-srcs">
-            {info.sources.map(s=><span key={s} className="info-panel-src">{s}</span>)}
-          </div>
-          <div style={{marginTop:10,fontSize:11,color:'var(--tl)',fontFamily:'var(--mono)'}}>⟳ {info.update}</div>
-        </div>
-      )}
+      {popup}
     </div>
   );
 }
@@ -1446,7 +1477,11 @@ function App() {
               {/* Tier 2 — supporting featured */}
               {featNews.slice(1).map(n=><FeatNewsItem key={n.id} item={n} kws={wl}/>)}
               {/* Trending Topics */}
-              <div className="wire-divider">Trending Topics<InfoButton info={PANEL_INFO.trending}/></div>
+              <div className="wire-divider has-info">
+                Trending Topics
+                <span className="wire-sep"/>
+                <InfoButton info={PANEL_INFO.trending}/>
+              </div>
               {TRENDING.map(t=><TrendItem key={t.id} t={t} maxScore={maxTrend}/>)}
             </>)}
           </div>
