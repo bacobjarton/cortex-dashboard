@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+<meta name="theme-color" content="#000000"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <title>CORTEX — AI Intelligence</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
 <style>
@@ -488,8 +491,10 @@ table.mt tr:hover td { background:rgba(44,44,46,.5) }
 }
 .mo-box {
   background:#1c1c1e; border:1px solid var(--brH);
-  padding:24px; min-width:380px; border-radius:var(--r);
-  box-shadow:0 32px 80px rgba(0,0,0,.8);
+  padding:24px; min-width:min(380px, calc(100vw - 32px));
+  max-width:calc(100vw - 32px);
+  border-radius:var(--r); box-shadow:0 32px 80px rgba(0,0,0,.8);
+  width:100%; max-width:440px;
 }
 .mo-title  { font-size:17px; font-weight:600; color:var(--tp); margin-bottom:16px }
 .wl-tags   { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:16px; min-height:32px }
@@ -543,6 +548,119 @@ table.mt tr:hover td { background:rgba(44,44,46,.5) }
    LOADING SKELETON — shimmer animation
    ────────────────────────────────────── */
 .skel { background:var(--fill2); border-radius:var(--r-xs); animation:shimmer 1.6s ease-in-out infinite }
+
+/* ──────────────────────────────────────
+   INFO BUTTON & POPOVER
+   ────────────────────────────────────── */
+.info-wrap { position:relative; display:inline-flex; align-items:center }
+.info-btn {
+  width:22px; height:22px; border-radius:50%;
+  background:transparent; border:none; cursor:pointer;
+  color:var(--tl); font-size:13px; line-height:1;
+  display:inline-flex; align-items:center; justify-content:center;
+  transition:background .15s, color .15s; flex-shrink:0;
+  font-family:var(--sans); font-style:normal;
+}
+.info-btn:hover, .info-btn.open { background:var(--fill2); color:var(--ts) }
+.info-panel {
+  position:absolute; top:calc(100% + 10px); right:0; z-index:400;
+  background:var(--bg2); border:1px solid var(--brH);
+  border-radius:var(--r); padding:16px;
+  width:min(290px, calc(100vw - 48px));
+  box-shadow:0 16px 48px rgba(0,0,0,.8);
+  animation:slideIn .15s ease-out;
+}
+/* caret arrow */
+.info-panel::before {
+  content:''; position:absolute; right:12px; top:-5px;
+  width:9px; height:9px; background:var(--bg2);
+  border-left:1px solid var(--brH); border-top:1px solid var(--brH);
+  transform:rotate(45deg);
+}
+.info-panel-title {
+  font-family:var(--sans); font-size:13px; font-weight:600;
+  color:var(--tp); margin-bottom:8px;
+}
+.info-panel-desc {
+  font-family:var(--sans); font-size:12px; color:var(--ts);
+  line-height:1.62; margin-bottom:12px;
+}
+.info-panel-lbl {
+  font-family:var(--sans); font-size:10px; font-weight:700;
+  letter-spacing:.07em; text-transform:uppercase;
+  color:var(--tl); margin-bottom:6px;
+}
+.info-panel-srcs { display:flex; flex-wrap:wrap; gap:4px }
+.info-panel-src  {
+  font-family:var(--mono); font-size:10px; font-weight:500;
+  color:var(--cB); background:var(--cF);
+  padding:2px 8px; border-radius:var(--r-xs);
+}
+
+/* ──────────────────────────────────────
+   BOTTOM TAB BAR — mobile only
+   ────────────────────────────────────── */
+.tab-bar {
+  display:none;
+  position:fixed; bottom:0; left:0; right:0; z-index:500;
+  background:rgba(28,28,30,.96);
+  backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+  border-top:1px solid var(--brH);
+  padding-bottom:env(safe-area-inset-bottom, 0px);
+}
+.tab-bar-inner { display:flex; height:52px }
+.tab-item {
+  flex:1; display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  gap:3px; cursor:pointer; background:none; border:none;
+  color:var(--td); font-family:var(--sans);
+  transition:color .15s; padding:0;
+  min-height:44px; /* Apple HIG minimum touch target */
+}
+.tab-item.on { color:var(--cM) }
+.tab-item.on .tab-icon { transform:scale(1.08) }
+.tab-icon  { font-size:20px; line-height:1; transition:transform .15s }
+.tab-label { font-size:10px; font-weight:500; letter-spacing:.01em }
+
+/* ──────────────────────────────────────
+   RESPONSIVE — Mobile & Tablet
+   ────────────────────────────────────── */
+@media (max-width:1023px) {
+  /* Hide status bar, show tab bar */
+  .sbar { display:none }
+  .tab-bar { display:block }
+
+  /* Single-panel layout: only the focused panel is visible */
+  .panels { grid-template-columns:1fr }
+  .panel  { display:none }
+  .panel.focused { display:flex }
+  .panel.focused { box-shadow:none } /* no focus ring at full width */
+
+  /* Safe scroll padding above fixed tab bar */
+  .pc { padding-bottom:calc(52px + env(safe-area-inset-bottom, 16px)) }
+
+  /* Touch-friendly tap areas */
+  .sp         { padding:16px }
+  .ni-compact { padding:12px 16px }
+  .ni-lead    { padding:18px }
+  .hdr        { padding:0 16px }
+  .fbar       { padding:0 12px }
+  .btn        { padding:7px 14px }
+  .chip       { padding:5px 12px }
+}
+
+/* Phone — compact header, hide non-essential chrome */
+@media (max-width:599px) {
+  .hdr-badge  { display:none }
+  .hdr-clock  { display:none }
+  .hdr-title  { font-size:18px }
+  .fbar       { height:46px }
+  .ph         { padding:10px 14px 9px }
+  .fsrch      { min-width:90px }
+  /* Info panel: expand to nearly full width */
+  .info-panel { width:calc(100vw - 32px); right:auto; left:-4px }
+  .info-panel::before { right:auto; left:12px }
+}
 </style>
 </head>
 <body>
@@ -961,6 +1079,60 @@ function TrendItem({t, maxScore}) {
   );
 }
 
+// ── Panel info metadata ──────────────────────────────────────
+const PANEL_INFO = {
+  left: {
+    title: 'Reddit Signal — how this works',
+    description: 'Live posts from high-signal AI communities, fetched via Reddit\'s free public API (no account needed). Posts are ranked by upvote score and recency. Urgency is auto-assigned: ⚡ FLASH for 2,000+ upvotes within 12 hours, ▲ PRIORITY for 400+ upvotes or posted within 20 hours, · ROUTINE for everything else.',
+    update: 'Refreshes every 10 min',
+    sources: ['r/MachineLearning','r/LocalLLaMA','r/artificial','r/singularity','r/OpenAI'],
+  },
+  center: {
+    title: 'AI Wire — how this works',
+    description: 'Headlines fetched live from major AI publications via RSS, plus top Hacker News stories filtered for AI topics. Stories are auto-classified by topic (models, research, funding, policy, open source, products) and urgency: ⚡ FLASH = breaking news under 3h, ▲ PRIORITY = under 18h, · ROUTINE = older. The hero card always shows the highest-urgency story.',
+    update: 'Refreshes every 10 min',
+    sources: ['TechCrunch AI','The Verge AI','VentureBeat','Wired AI','arXiv cs.AI','Hacker News'],
+  },
+  right: {
+    title: 'Model Watch — how this works',
+    description: 'Arena ELO scores come from the LM Arena community leaderboard — thousands of anonymous human comparisons in blind A/B tests. Higher ELO = stronger model by real user preference, not just benchmark scores. Trending topics reflect cross-platform AI discussion volume. Rankings shown are illustrative of real standings.',
+    update: 'Curated data',
+    sources: ['LM Arena ELO','Community A/B votes','Cross-platform trends'],
+  },
+};
+
+function InfoButton({info}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef();
+  useEffect(()=>{
+    if(!open) return;
+    const h = e => { if(!ref.current?.contains(e.target)) setOpen(false); };
+    document.addEventListener('mousedown', h, true);
+    return () => document.removeEventListener('mousedown', h, true);
+  },[open]);
+  return (
+    <div className="info-wrap" ref={ref}>
+      <button
+        className={`info-btn${open?' open':''}`}
+        onClick={e=>{ e.stopPropagation(); setOpen(v=>!v); }}
+        aria-label="About this panel"
+        title="About this panel"
+      >ⓘ</button>
+      {open&&(
+        <div className="info-panel">
+          <div className="info-panel-title">{info.title}</div>
+          <div className="info-panel-desc">{info.description}</div>
+          <div className="info-panel-lbl">Data sources</div>
+          <div className="info-panel-srcs">
+            {info.sources.map(s=><span key={s} className="info-panel-src">{s}</span>)}
+          </div>
+          <div style={{marginTop:10,fontSize:11,color:'var(--tl)',fontFamily:'var(--mono)'}}>⟳ {info.update}</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ModelsOverlay({onClose}) {
   return (
     <div className="models-overlay">
@@ -1188,6 +1360,7 @@ function App() {
             <div className="ph-meta">
               {fSocial.filter(s=>s.urg==='FLASH').length>0&&<span style={{color:'var(--fla)',animation:'blink 1.4s step-end infinite',fontSize:11,fontWeight:700}}>⚡ {fSocial.filter(s=>s.urg==='FLASH').length}</span>}
               <PanelDot/><span>{fSocial.length} posts</span>
+              <InfoButton info={PANEL_INFO.left}/>
             </div>
           </div>
           <div id="pc-left" className="pc">
@@ -1204,6 +1377,7 @@ function App() {
             <div className="ph-meta">
               {fNews.filter(n=>n.urg==='FLASH').length>0&&<span style={{color:'var(--fla)',animation:'blink 1.4s step-end infinite',fontSize:11,fontWeight:700}}>⚡ {fNews.filter(n=>n.urg==='FLASH').length} flash</span>}
               <PanelDot/><span>{fNews.length} stories</span>
+              <InfoButton info={PANEL_INFO.center}/>
             </div>
           </div>
           <div id="pc-center" className="pc">
@@ -1243,7 +1417,10 @@ function App() {
         <div className={`panel${focused==='right'?' focused':''}`} onClick={()=>setFocused('right')}>
           <div className="ph">
             <span className="ph-title">Model Watch</span>
-            <div className="ph-meta"><span>{LEADERBOARD.length} models</span></div>
+            <div className="ph-meta">
+              <span>{LEADERBOARD.length} models</span>
+              <InfoButton info={PANEL_INFO.right}/>
+            </div>
           </div>
           <div id="pc-right" className="pc">
             <div className="sec-div"><span>Arena ELO Leaderboard</span><span>{LEADERBOARD.length}</span></div>
@@ -1269,6 +1446,23 @@ function App() {
         </div>
         <div style={{display:'flex',gap:10,color:'var(--td)'}}>
           <span>N:{fNews.length}</span><span>S:{fSocial.length}</span><span>M:{LEADERBOARD.length}</span>
+        </div>
+      </div>
+
+      {/* BOTTOM TAB BAR — mobile only, hidden on desktop via CSS */}
+      <div className="tab-bar">
+        <div className="tab-bar-inner">
+          {[
+            {id:'left',  icon:'📡', label:'Reddit'},
+            {id:'center',icon:'📰', label:'Wire'},
+            {id:'right', icon:'🤖', label:'Models'},
+          ].map(t=>(
+            <button key={t.id} className={`tab-item${focused===t.id?' on':''}`}
+              onClick={()=>setFocused(t.id)}>
+              <span className="tab-icon">{t.icon}</span>
+              <span className="tab-label">{t.label}</span>
+            </button>
+          ))}
         </div>
       </div>
 
