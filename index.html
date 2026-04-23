@@ -428,8 +428,7 @@ body {
   font-family:var(--mono); font-size:10px; font-weight:600;
   padding:1px 5px; border-radius:var(--r-xs);
 }
-.tr-src-badge.li { color:#4ab0d8; background:rgba(74,176,216,.15) }
-.tr-src-badge.x  { color:var(--ts); background:var(--fill2) }
+.tr-src-badge.rd { color:#ff6314; background:rgba(255,99,20,.12); border:1px solid rgba(255,99,20,.2) }
 .tr-src-badge.nw { color:var(--ts); background:var(--fill3) }
 
 /* ──────────────────────────────────────
@@ -803,7 +802,7 @@ const RSS_SOURCES = [
   { url:'https://www.theverge.com/rss/ai-artificial-intelligence/index.xml', source:'The Verge', sId:'mainstream' },
   { url:'https://venturebeat.com/category/ai/feed/',                      source:'VentureBeat', sId:'mainstream' },
   { url:'https://www.wired.com/feed/tag/ai/latest/rss',                   source:'Wired',       sId:'mainstream' },
-  { url:'http://export.arxiv.org/rss/cs.AI',                              source:'arXiv',       sId:'arxiv'      },
+  { url:'https://export.arxiv.org/rss/cs.AI',                             source:'arXiv',       sId:'arxiv'      },
 ];
 
 function assignCategory(text) {
@@ -942,6 +941,47 @@ async function fetchAllReddit() {
   return posts
     .filter(p => { const k = p.title.slice(0,40).toLowerCase(); if(seen.has(k))return false; seen.add(k); return true; })
     .sort((a,b) => (URG_O[a.urg]??2)-(URG_O[b.urg]??2) || b.likes - a.likes);
+}
+
+// ── Dynamic trending topics ────────────────────────────────────
+const TOPIC_DEFS = [
+  { topic:'Claude / Anthropic',     kw:['claude','anthropic'] },
+  { topic:'GPT / OpenAI',           kw:['gpt','chatgpt','openai','o3','o4'] },
+  { topic:'Gemini / Google AI',     kw:['gemini','google ai','deepmind','google deep'] },
+  { topic:'Llama / Meta AI',        kw:['llama','meta ai'] },
+  { topic:'Grok / xAI',             kw:['grok','xai'] },
+  { topic:'DeepSeek',               kw:['deepseek'] },
+  { topic:'Reasoning models',       kw:['reasoning','chain of thought','extended think'] },
+  { topic:'Open-source AI',         kw:['open source','open weight','open-source','hugging face'] },
+  { topic:'AI agents & automation', kw:['agent','agentic','autonomous','automation'] },
+  { topic:'AI regulation & policy', kw:['regulat','policy','eu ai act','government','congress','law'] },
+  { topic:'AI funding & deals',     kw:['funding','raises','valuat','billion','series ','acqui','ipo'] },
+  { topic:'Benchmarks & evals',     kw:['benchmark','leaderboard','arena','eval','score','mmlu','humaneval'] },
+  { topic:'AI coding tools',        kw:['coding','copilot','cursor','devin','developer tool'] },
+  { topic:'Multimodal AI',          kw:['multimodal','vision','image','video','audio'] },
+  { topic:'AGI / superintelligence',kw:['agi','superintelligence','artificial general'] },
+  { topic:'AI safety & alignment',  kw:['safety','alignment','misalign','harm','risk'] },
+  { topic:'Mistral',                kw:['mistral'] },
+  { topic:'Qwen / Alibaba AI',      kw:['qwen','alibaba'] },
+];
+
+function computeTrending(newsItems, socialItems) {
+  const newsTexts   = newsItems.map(i => ((i.title||'') + ' ' + (i.content||'')).toLowerCase());
+  const socialTexts = socialItems.map(i => ((i.title||'') + ' ' + (i.content||'')).toLowerCase());
+  const scored = TOPIC_DEFS.map(def => {
+    const nwCt = newsTexts.filter(t   => def.kw.some(k => t.includes(k))).length;
+    const rdCt = socialTexts.filter(t => def.kw.some(k => t.includes(k))).length;
+    return { topic: def.topic, nwCt, rdCt, raw: nwCt + rdCt * 1.5 };
+  }).filter(t => t.raw > 0).sort((a,b) => b.raw - a.raw).slice(0, 8);
+  if (!scored.length) return null;
+  const maxRaw = scored[0].raw;
+  return scored.map((t, i) => ({
+    id:    `trl-${i}`,
+    topic: t.topic,
+    score: Math.max(1, Math.round((t.raw / maxRaw) * 99)),
+    nwCt:  t.nwCt,
+    rdCt:  t.rdCt,
+  }));
 }
 
 // ── Filter ────────────────────────────────────────────────────
@@ -1092,8 +1132,7 @@ function TrendItem({t, maxScore}) {
       </div>
       <div className="tr-bar"><div className="tr-fill" style={{width:`${pct}%`}}/></div>
       <div className="tr-foot">
-        <span><span className="tr-src-badge li">LI</span> {t.liCt}</span>
-        <span><span className="tr-src-badge x">X</span> {t.xCt}</span>
+        <span><span className="tr-src-badge rd">RD</span> {t.rdCt ?? t.liCt}</span>
         <span><span className="tr-src-badge nw">NEWS</span> {t.nwCt}</span>
       </div>
     </div>
@@ -1277,9 +1316,10 @@ function App() {
   const [dataStatus,   setDataStatus]   = useState('loading');
   const [newsData,     setNewsData]     = useState(NEWS);
   const [socialData,   setSocialData]   = useState(SOCIAL); // starts as curated demo
-  const [refreshKey,   setRefreshKey]   = useState(0);       // increment to trigger re-fetch
-  const [refreshing,   setRefreshing]   = useState(false);   // manual refresh in-flight
-  const [lastFetched,  setLastFetched]  = useState(null);    // timestamp of last successful fetch
+  const [refreshKey,   setRefreshKey]   = useState(0);
+  const [refreshing,   setRefreshing]   = useState(false);
+  const [lastFetched,  setLastFetched]  = useState(null);
+  const [trendingData, setTrendingData] = useState(TRENDING);
   const [wl, setWl] = useState(()=>{
     try{const s=localStorage.getItem('cx2_wl');return s?JSON.parse(s):DEFAULT_WL;}catch{return DEFAULT_WL;}
   });
@@ -1306,26 +1346,38 @@ function App() {
 
       let anyLive = false;
 
-      if (newsResult.status==='fulfilled' && newsResult.value.length >= 3) {
-        const items = newsResult.value;
+      const liveNews   = newsResult.status==='fulfilled'   && newsResult.value.length   >= 3 ? newsResult.value   : null;
+      const liveSocial = redditResult.status==='fulfilled' && redditResult.value.length >= 3 ? redditResult.value : null;
+
+      if (liveNews) {
+        const items = [...liveNews];
         items.sort((a,b)=>(URG_O[a.urg]??2)-(URG_O[b.urg]??2)||(new Date(b.timestamp)-new Date(a.timestamp)));
         setNewsData(items);
         anyLive = true;
       }
+      if (liveSocial) { setSocialData(liveSocial); anyLive = true; }
 
-      if (redditResult.status==='fulfilled' && redditResult.value.length >= 3) {
-        setSocialData(redditResult.value);
-        anyLive = true;
-      }
+      const trending = computeTrending(liveNews || [], liveSocial || []);
+      if (trending) setTrendingData(trending);
 
       setDataStatus(anyLive ? 'live' : 'demo');
       setRefreshing(false);
       if (anyLive) setLastFetched(new Date());
     };
     load();
-    const interval = setInterval(load, 10 * 60 * 1000);
+    const interval = setInterval(load, 5 * 60 * 1000);
     return () => { cancelled = true; clearInterval(interval); };
   },[refreshKey]);
+
+  useEffect(()=>{
+    const onVisible = () => {
+      if (document.visibilityState !== 'visible') return;
+      const stale = !lastFetched || (Date.now() - lastFetched.getTime() > 5 * 60 * 1000);
+      if (stale) setRefreshKey(k => k + 1);
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, [lastFetched]);
 
   useEffect(()=>{
     const h=e=>{
@@ -1357,7 +1409,7 @@ function App() {
   const compactNews = fNews.slice(3);
   const flashCt  = fNews.filter(n=>n.urg==='FLASH').length + fSocial.filter(s=>s.urg==='FLASH').length;
   const active   = f.sources.length||f.categories.length||f.urgency.length||f.q;
-  const maxTrend = Math.max(...TRENDING.map(t=>t.score));
+  const maxTrend = Math.max(...trendingData.map(t=>t.score));
 
   const PanelDot = ()=><div className="ph-dot"/>;
 
@@ -1482,7 +1534,7 @@ function App() {
                 <span className="wire-sep"/>
                 <InfoButton info={PANEL_INFO.trending}/>
               </div>
-              {TRENDING.map(t=><TrendItem key={t.id} t={t} maxScore={maxTrend}/>)}
+              {trendingData.map(t=><TrendItem key={t.id} t={t} maxScore={maxTrend}/>)}
             </>)}
           </div>
         </div>
