@@ -430,6 +430,11 @@ body {
 }
 .tr-src-badge.rd { color:#ff6314; background:rgba(255,99,20,.12); border:1px solid rgba(255,99,20,.2) }
 .tr-src-badge.nw { color:var(--ts); background:var(--fill3) }
+.tr-reason {
+  font-size:11px; color:var(--td); line-height:1.45; margin-bottom:6px;
+  font-style:italic;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+}
 
 /* ──────────────────────────────────────
    SECTION DIVIDER (right panel)
@@ -744,7 +749,9 @@ const SRC_C = {
   'The Verge':'#d4622a','TechCrunch':'#c84818','Bloomberg':'#3870cc',
   Wired:'#7a9ab0','FT':'#cc8020','NYT Tech':'#bb3030',
   'GitHub Blog':'#22aa66','Hacker News':'#dd6600','arXiv':'#aa2020',
-  Perplexity:'#5b8dde',
+  Perplexity:'#5b8dde','Ars Technica':'#ff6600',
+  'MIT Tech Review':'#a00000','arXiv ML':'#b52020',
+  VentureBeat:'#7b5ea7',
 };
 
 const NEWS = [
@@ -781,28 +788,31 @@ const LEADERBOARD = [
 ];
 
 const TRENDING = [
-  {id:'tr1', topic:'Claude 4 release speculation',    score:94, liCt:234, xCt:412, nwCt:201},
-  {id:'tr2', topic:'OpenAI o3 pricing controversy',   score:87, liCt:156, xCt:389, nwCt:167},
-  {id:'tr3', topic:'Llama 4 Scout benchmark results', score:82, liCt:312, xCt:498, nwCt:143},
-  {id:'tr4', topic:'AGI timeline debate',             score:78, liCt:189, xCt:521, nwCt:89},
-  {id:'tr5', topic:'EU AI Act compliance deadlines',  score:71, liCt:410, xCt:213, nwCt:234},
-  {id:'tr6', topic:'Reasoning model arms race',       score:65, liCt:143, xCt:287, nwCt:112},
-  {id:'tr7', topic:'Open source vs closed AI',        score:58, liCt:198, xCt:341, nwCt:78},
-  {id:'tr8', topic:'AI coding assistants comparison', score:52, liCt:267, xCt:189, nwCt:134},
+  {id:'tr1', topic:'Claude 4 release speculation',    score:94, rdCt:412, nwCt:201, reason:'Growing community speculation around next-gen Anthropic release timeline and capabilities'},
+  {id:'tr2', topic:'OpenAI o3 pricing controversy',   score:87, rdCt:389, nwCt:167, reason:'Developers debate steep API costs vs. real-world reasoning performance gains'},
+  {id:'tr3', topic:'Llama 4 Scout benchmark results', score:82, rdCt:498, nwCt:143, reason:'New open-source SOTA: 92.3% HumanEval, 512k context — beats closed models on code'},
+  {id:'tr4', topic:'AGI timeline debate',             score:78, rdCt:521, nwCt:89,  reason:'Multiple lab CEOs making bold 2–5 year AGI claims, sparking community pushback'},
+  {id:'tr5', topic:'EU AI Act compliance deadlines',  score:71, rdCt:213, nwCt:234, reason:'Enforcement now active — high-risk AI systems in hiring/credit face mandatory audits'},
+  {id:'tr6', topic:'Reasoning model arms race',       score:65, rdCt:287, nwCt:112, reason:'OpenAI o3, Claude 3.7 thinking, DeepSeek R2 all competing on chain-of-thought'},
+  {id:'tr7', topic:'Open source vs closed AI',        score:58, rdCt:341, nwCt:78,  reason:"Meta's Llama 4 reignites debate: can open weights match closed frontier models?"},
+  {id:'tr8', topic:'AI coding assistants comparison', score:52, rdCt:189, nwCt:134, reason:'Cursor vs Copilot vs Devin: community benchmarks reveal significant real-world gaps'},
 ];
 
 // ── Live data fetching ────────────────────────────────────────
 // News: RSS via rss2json.com (free, no key needed for personal use)
 // Social: Reddit public JSON API (free, no key, no auth required)
 
-const RSS2JSON = 'https://api.rss2json.com/v1/api.json?count=8&rss_url=';
+const RSS2JSON = 'https://api.rss2json.com/v1/api.json?count=12&rss_url=';
 
 const RSS_SOURCES = [
-  { url:'https://techcrunch.com/category/artificial-intelligence/feed/', source:'TechCrunch',  sId:'mainstream' },
-  { url:'https://www.theverge.com/rss/ai-artificial-intelligence/index.xml', source:'The Verge', sId:'mainstream' },
-  { url:'https://venturebeat.com/category/ai/feed/',                      source:'VentureBeat', sId:'mainstream' },
-  { url:'https://www.wired.com/feed/tag/ai/latest/rss',                   source:'Wired',       sId:'mainstream' },
-  { url:'https://export.arxiv.org/rss/cs.AI',                             source:'arXiv',       sId:'arxiv'      },
+  { url:'https://techcrunch.com/category/artificial-intelligence/feed/', source:'TechCrunch',      sId:'mainstream' },
+  { url:'https://www.theverge.com/rss/ai-artificial-intelligence/index.xml', source:'The Verge',   sId:'mainstream' },
+  { url:'https://venturebeat.com/category/ai/feed/',                      source:'VentureBeat',    sId:'mainstream' },
+  { url:'https://www.wired.com/feed/tag/ai/latest/rss',                   source:'Wired',          sId:'mainstream' },
+  { url:'https://arstechnica.com/ai/feed/',                               source:'Ars Technica',   sId:'mainstream' },
+  { url:'https://www.technologyreview.com/feed/',                         source:'MIT Tech Review',sId:'mainstream' },
+  { url:'https://export.arxiv.org/rss/cs.AI',                             source:'arXiv',          sId:'arxiv'      },
+  { url:'https://export.arxiv.org/rss/cs.LG',                             source:'arXiv ML',       sId:'arxiv'      },
 ];
 
 function assignCategory(text) {
@@ -932,11 +942,16 @@ async function fetchSubreddit({sub, label, cat}) {
 }
 
 async function fetchAllReddit() {
-  const results = await Promise.allSettled(REDDIT_SUBS.map(fetchSubreddit));
-  const posts = results
-    .filter(r => r.status === 'fulfilled')
-    .flatMap(r => r.value);
-  // Dedupe by title similarity, sort by score then recency
+  // Stagger requests ~250 ms apart to avoid Reddit rate-limiting (429)
+  const posts = [];
+  for (const sub of REDDIT_SUBS) {
+    try {
+      const result = await fetchSubreddit(sub);
+      posts.push(...result);
+    } catch(e) { /* skip failed sub */ }
+    await new Promise(r => setTimeout(r, 250));
+  }
+  // Dedupe by title prefix, sort by urgency then score
   const seen = new Set();
   return posts
     .filter(p => { const k = p.title.slice(0,40).toLowerCase(); if(seen.has(k))return false; seen.add(k); return true; })
@@ -966,22 +981,62 @@ const TOPIC_DEFS = [
 ];
 
 function computeTrending(newsItems, socialItems) {
-  const newsTexts   = newsItems.map(i => ((i.title||'') + ' ' + (i.content||'')).toLowerCase());
-  const socialTexts = socialItems.map(i => ((i.title||'') + ' ' + (i.content||'')).toLowerCase());
   const scored = TOPIC_DEFS.map(def => {
-    const nwCt = newsTexts.filter(t   => def.kw.some(k => t.includes(k))).length;
-    const rdCt = socialTexts.filter(t => def.kw.some(k => t.includes(k))).length;
-    return { topic: def.topic, nwCt, rdCt, raw: nwCt + rdCt * 1.5 };
-  }).filter(t => t.raw > 0).sort((a,b) => b.raw - a.raw).slice(0, 8);
-  if (!scored.length) return null;
-  const maxRaw = scored[0].raw;
-  return scored.map((t, i) => ({
-    id:    `trl-${i}`,
-    topic: t.topic,
-    score: Math.max(1, Math.round((t.raw / maxRaw) * 99)),
-    nwCt:  t.nwCt,
-    rdCt:  t.rdCt,
+    const matchNews   = newsItems.filter(i   => def.kw.some(k => ((i.title||'')  + ' ' + (i.content||'')).toLowerCase().includes(k)));
+    const matchSocial = socialItems.filter(i => def.kw.some(k => ((i.title||'')  + ' ' + (i.content||'')).toLowerCase().includes(k)));
+    const nwCt = matchNews.length;
+    const rdCt = matchSocial.length;
+    const raw  = nwCt + rdCt * 1.5;
+    // best reason: highest-urgency news headline, else top-voted social title
+    const topNews   = [...matchNews].sort((a,b)   => (URG_O[a.urg]??2)-(URG_O[b.urg]??2))[0];
+    const topSocial = [...matchSocial].sort((a,b) => b.likes - a.likes)[0];
+    const reason    = (topNews?.title || topSocial?.title || topSocial?.content || '').slice(0, 100) || null;
+    return { topic: def.topic, nwCt, rdCt, raw, reason };
+  })
+  .sort((a,b) => b.raw - a.raw);
+
+  // Always return at least 5 topics — pad with top defs even if count is 0
+  const withSignal  = scored.filter(t => t.raw > 0).slice(0, 8);
+  const padNeeded   = Math.max(0, 5 - withSignal.length);
+  const padding     = scored.filter(t => t.raw === 0).slice(0, padNeeded).map(t => ({...t, raw:0}));
+  const final       = [...withSignal, ...padding].slice(0, 8);
+
+  if (!final.length) return null;
+  const maxRaw = final[0].raw || 1;
+  return final.map((t, i) => ({
+    id:     `trl-${i}`,
+    topic:  t.topic,
+    score:  t.raw > 0 ? Math.max(1, Math.round((t.raw / maxRaw) * 99)) : 0,
+    nwCt:   t.nwCt,
+    rdCt:   t.rdCt,
+    reason: t.reason,
   }));
+}
+
+// ── HuggingFace trending models ──────────────────────────────
+async function fetchHFTrending() {
+  const res = await fetch(
+    'https://huggingface.co/api/models?sort=trending&direction=-1&filter=text-generation&limit=15',
+    { signal: AbortSignal.timeout(7000) }
+  );
+  if (!res.ok) return [];
+  const data = await res.json();
+  return (Array.isArray(data) ? data : [])
+    .filter(m => m.modelId || m.id)
+    .slice(0, 10)
+    .map((m, i) => {
+      const fullId = m.modelId || m.id || '';
+      const parts  = fullId.split('/');
+      return {
+        id:        `hf-${i}`,
+        rank:      i + 1,
+        name:      parts[1] || parts[0] || fullId,
+        org:       parts.length > 1 ? parts[0] : '',
+        downloads: m.downloads || 0,
+        likes:     m.likes || 0,
+        url:       `https://huggingface.co/${fullId}`,
+      };
+    });
 }
 
 // ── Filter ────────────────────────────────────────────────────
@@ -1106,7 +1161,8 @@ function NewsItem({item, kws}) {
 
 function ModelRankItem({m}) {
   return (
-    <div className="mr">
+    <div className="mr" style={{cursor:'pointer'}}
+      onClick={()=>window.open('https://lmarena.ai/leaderboard','_blank','noopener,noreferrer')}>
       <span className={`mr-rank${m.rank<=3?' top':''}`}>#{m.rank}</span>
       <div className="mr-info">
         <div className="mr-name">
@@ -1121,19 +1177,35 @@ function ModelRankItem({m}) {
   );
 }
 
-function TrendItem({t, maxScore}) {
-  const pct = Math.round((t.score / maxScore) * 100);
+function HFModelItem({m}) {
+  return (
+    <div className="mr" style={{cursor:'pointer'}}
+      onClick={()=>window.open(m.url,'_blank','noopener,noreferrer')}>
+      <span className="mr-rank">#{m.rank}</span>
+      <div className="mr-info">
+        <div className="mr-name">{m.name}</div>
+        <div className="mr-lab">{m.org}</div>
+      </div>
+      <span style={{fontFamily:'var(--mono)',fontSize:11,color:'var(--td)',flexShrink:0}}>↓{fmtNum(m.downloads)}</span>
+      <span style={{fontFamily:'var(--mono)',fontSize:11,color:'var(--cM)',flexShrink:0,marginLeft:6}}>♥{fmtNum(m.likes)}</span>
+    </div>
+  );
+}
+
+function TrendItem({t, idx, maxScore}) {
+  const pct = maxScore > 0 ? Math.round((t.score / maxScore) * 100) : 0;
   return (
     <div className="tr">
       <div className="tr-top">
-        <span className="tr-rank">#{t.id.replace('tr','')}</span>
+        <span className="tr-rank">#{idx + 1}</span>
         <span className="tr-name">{t.topic}</span>
-        <span className="tr-score">{t.score}</span>
+        {t.score > 0 && <span className="tr-score">{t.score}</span>}
       </div>
       <div className="tr-bar"><div className="tr-fill" style={{width:`${pct}%`}}/></div>
+      {t.reason && <div className="tr-reason">{t.reason}</div>}
       <div className="tr-foot">
-        <span><span className="tr-src-badge rd">RD</span> {t.rdCt ?? t.liCt}</span>
-        <span><span className="tr-src-badge nw">NEWS</span> {t.nwCt}</span>
+        <span><span className="tr-src-badge rd">RD</span> {t.rdCt ?? t.liCt ?? 0}</span>
+        <span><span className="tr-src-badge nw">NEWS</span> {t.nwCt ?? 0}</span>
       </div>
     </div>
   );
@@ -1320,6 +1392,7 @@ function App() {
   const [refreshing,   setRefreshing]   = useState(false);
   const [lastFetched,  setLastFetched]  = useState(null);
   const [trendingData, setTrendingData] = useState(TRENDING);
+  const [hfModels,     setHfModels]     = useState([]);
   const [wl, setWl] = useState(()=>{
     try{const s=localStorage.getItem('cx2_wl');return s?JSON.parse(s):DEFAULT_WL;}catch{return DEFAULT_WL;}
   });
@@ -1365,19 +1438,29 @@ function App() {
       if (anyLive) setLastFetched(new Date());
     };
     load();
-    const interval = setInterval(load, 5 * 60 * 1000);
+    const interval = setInterval(load, 3 * 60 * 1000);
     return () => { cancelled = true; clearInterval(interval); };
   },[refreshKey]);
 
   useEffect(()=>{
     const onVisible = () => {
       if (document.visibilityState !== 'visible') return;
-      const stale = !lastFetched || (Date.now() - lastFetched.getTime() > 5 * 60 * 1000);
+      const stale = !lastFetched || (Date.now() - lastFetched.getTime() > 3 * 60 * 1000);
       if (stale) setRefreshKey(k => k + 1);
     };
     document.addEventListener('visibilitychange', onVisible);
     return () => document.removeEventListener('visibilitychange', onVisible);
   }, [lastFetched]);
+
+  // HuggingFace trending — independent 10-min cycle
+  useEffect(()=>{
+    const load = async () => {
+      try { const m = await fetchHFTrending(); if (m.length) setHfModels(m); } catch(e){}
+    };
+    load();
+    const id = setInterval(load, 10 * 60 * 1000);
+    return () => clearInterval(id);
+  }, []);
 
   useEffect(()=>{
     const h=e=>{
@@ -1534,7 +1617,7 @@ function App() {
                 <span className="wire-sep"/>
                 <InfoButton info={PANEL_INFO.trending}/>
               </div>
-              {trendingData.map(t=><TrendItem key={t.id} t={t} maxScore={maxTrend}/>)}
+              {trendingData.map((t,i)=><TrendItem key={t.id} t={t} idx={i} maxScore={maxTrend}/>)}
             </>)}
           </div>
         </div>
@@ -1545,12 +1628,21 @@ function App() {
             <span className="ph-title">Model Watch</span>
             <div className="ph-meta">
               <span>{LEADERBOARD.length} models</span>
+              <button className="refresh-btn" title="Open live Arena leaderboard"
+                onClick={e=>{e.stopPropagation();window.open('https://lmarena.ai/leaderboard','_blank','noopener,noreferrer');}}>↗</button>
               <InfoButton info={PANEL_INFO.right}/>
             </div>
           </div>
           <div id="pc-right" className="pc">
-            <div className="sec-div"><span>Arena ELO Leaderboard</span><span>{LEADERBOARD.length}</span></div>
+            <div className="sec-div"><span>Arena ELO · lmarena.ai</span><span>{LEADERBOARD.length}</span></div>
             {LEADERBOARD.map(m=><ModelRankItem key={m.id} m={m}/>)}
+            {hfModels.length > 0 && (<>
+              <div className="sec-div" style={{marginTop:4}}>
+                <span>🔥 Trending on HuggingFace</span>
+                <span>{hfModels.length}</span>
+              </div>
+              {hfModels.map(m=><HFModelItem key={m.id} m={m}/>)}
+            </>)}
           </div>
         </div>
 
