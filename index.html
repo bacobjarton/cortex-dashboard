@@ -1059,17 +1059,21 @@ function SocialPost({post, kws}) {
   const isReddit = post.platform === 'reddit';
   const isLI     = post.platform === 'linkedin';
   const urgCls   = post.urg==='FLASH'?' fl':post.urg==='PRIORITY'?' pr':'';
+  const link     = post.permalink || post.url || null;
 
   const badge = isReddit
     ? <span className="sp-plat rd">{post.sub}</span>
     : <span className={`sp-plat ${isLI?'li':'x'}`}>{isLI?'LI':'X'}</span>;
 
   return (
-    <div className={`sp${urgCls}`} onClick={()=>post.permalink&&window.open(post.permalink,'_blank')}>
+    <div className={`sp${urgCls}`}
+      style={link ? {cursor:'pointer'} : {}}
+      onClick={()=>link && window.open(link,'_blank','noopener,noreferrer')}>
       <div className="sp-top">
         {badge}
         <span className="sp-handle">{post.handle}</span>
         <span className="sp-time">{timeAgo(post.timestamp)}</span>
+        {link && <span style={{fontSize:11,color:'var(--td)',marginLeft:4}}>↗</span>}
       </div>
       {isReddit && post.title !== post.content &&
         <div className="sp-title"><Hl text={post.title} kws={kws}/></div>
@@ -1214,9 +1218,9 @@ function TrendItem({t, idx, maxScore}) {
 // ── Panel info metadata ──────────────────────────────────────
 const PANEL_INFO = {
   left: {
-    title: 'Reddit Signal — how this works',
-    description: 'Live posts from high-signal AI communities, fetched via Reddit\'s free public API (no account needed). Posts are ranked by upvote score and recency. Urgency is auto-assigned: ⚡ FLASH for 2,000+ upvotes within 12 hours, ▲ PRIORITY for 400+ upvotes or posted within 20 hours, · ROUTINE for everything else.',
-    update: 'Refreshes every 10 min',
+    title: 'Social Signal — how this works',
+    description: 'Live posts from high-signal AI communities on Reddit, fetched via the free public API (no account needed). Posts are ranked by upvote score and recency. Click any card to open the original post. Urgency is auto-assigned: ⚡ FLASH for 2,000+ upvotes within 12 hours, ▲ PRIORITY for 400+ upvotes or posted within 20 hours, · ROUTINE for everything else.',
+    update: 'Refreshes every 3 min',
     sources: ['r/MachineLearning','r/LocalLLaMA','r/artificial','r/singularity','r/OpenAI'],
   },
   center: {
@@ -1527,7 +1531,7 @@ function App() {
       {/* FILTER BAR */}
       <div className="fbar">
         {[
-          {id:'reddit',l:'Reddit'},{id:'mainstream',l:'News'},
+          {id:'reddit',l:'Social'},{id:'mainstream',l:'News'},
           {id:'github',l:'GitHub'},{id:'arxiv',l:'arXiv'},{id:'hn',l:'HN'},
         ].map(s=>(
           <button key={s.id} className={`chip${f.sources.includes(s.id)?' on':''}`} onClick={()=>tog('sources',s.id)}>{s.l}</button>
@@ -1557,7 +1561,7 @@ function App() {
         {/* LEFT — SOCIAL */}
         <div className={`panel${focused==='left'?' focused':''}`} onClick={()=>setFocused('left')}>
           <div className="ph">
-            <span className="ph-title">Reddit Signal</span>
+            <span className="ph-title">Social Signal</span>
             <div className="ph-meta">
               {fSocial.filter(s=>s.urg==='FLASH').length>0&&<span style={{color:'var(--fla)',animation:'blink 1.4s step-end infinite',fontSize:11,fontWeight:700}}>⚡ {fSocial.filter(s=>s.urg==='FLASH').length}</span>}
               <PanelDot/><span>{fSocial.length} posts</span>
@@ -1669,7 +1673,7 @@ function App() {
       <div className="tab-bar">
         <div className="tab-bar-inner">
           {[
-            {id:'left',  icon:'📡', label:'Reddit'},
+            {id:'left',  icon:'📡', label:'Social'},
             {id:'center',icon:'📰', label:'Wire'},
             {id:'right', icon:'🤖', label:'Models'},
           ].map(t=>(
