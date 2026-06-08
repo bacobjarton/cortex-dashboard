@@ -723,26 +723,26 @@ const URG_SYM = {FLASH:'⚡',PRIORITY:'▲',ROUTINE:'·'};
 
 // ── Data ─────────────────────────────────────────────────────
 const SOCIAL = [
-  {id:'s1',  platform:'twitter', sId:'twitter', handle:'@sama',           content:"we're getting closer to AGI than most people realize. the next 6 months will be unlike anything we've seen before.",                                                  timestamp:ago(3),   urg:'FLASH',    likes:28431, reposts:6821, cat:'models'},
-  {id:'s2',  platform:'linkedin',sId:'linkedin', handle:'Mark Zuckerberg', content:'Llama 4 Scout is out now — open source, 512k context window, topping HumanEval at 92.3%. The open source AI movement is winning.',                                    timestamp:ago(7),   urg:'FLASH',    likes:41230, reposts:8340, cat:'opensource'},
-  {id:'s3',  platform:'twitter', sId:'twitter', handle:'@karpathy',        content:'Llama 4 Scout is genuinely impressive. Open weights, 512k context, beats HumanEval — this raises the floor for what "open source" means. Meta is playing for keeps.',  timestamp:ago(12),  urg:'PRIORITY', likes:8921,  reposts:1876, cat:'models'},
-  {id:'s4',  platform:'linkedin',sId:'linkedin', handle:'Dario Amodei',    content:"Claude 3.7 Sonnet is our most capable model to date. Extended thinking + 200k context enables genuinely new use cases. We're seeing 3x the usage of Sonnet 3.5.",      timestamp:ago(18),  urg:'PRIORITY', likes:22140, reposts:4120, cat:'models'},
-  {id:'s5',  platform:'twitter', sId:'twitter', handle:'@ylecun',          content:'Reminder that all current LLMs (including "reasoning" models) are still fundamentally autocomplete machines. Real AI is elsewhere.',                                   timestamp:ago(24),  urg:'PRIORITY', likes:4532,  reposts:1201, cat:'research'},
-  {id:'s6',  platform:'linkedin',sId:'linkedin', handle:'Jensen Huang',    content:'The AI infrastructure buildout is accelerating. NVIDIA shipped $14B in data center GPUs last quarter. This is the industrial revolution of our time.',                  timestamp:ago(31),  urg:'PRIORITY', likes:58340, reposts:9210, cat:'products'},
-  {id:'s7',  platform:'twitter', sId:'twitter', handle:'@swyx',            content:'Hot take: Claude 3.7 Sonnet with extended thinking is now the best coding model. Beats o3 on SWE-bench for a fraction of the latency.',                                timestamp:ago(38),  urg:'PRIORITY', likes:2341,  reposts:534,  cat:'products'},
-  {id:'s8',  platform:'linkedin',sId:'linkedin', handle:'Satya Nadella',   content:'GitHub Copilot now has 1.8 million paid subscribers. Teams using Copilot complete PRs 55% faster. The ROI is measurable.',                                             timestamp:ago(44),  urg:'PRIORITY', likes:34120, reposts:6230, cat:'products'},
-  {id:'s9',  platform:'twitter', sId:'twitter', handle:'@elonmusk',        content:'Grok 3 achieves the highest GPQA score of any frontier model. Congrats to the xAI team — built in under 2 years.',                                                     timestamp:ago(52),  urg:'PRIORITY', likes:89230, reposts:21430,cat:'models'},
-  {id:'s10', platform:'linkedin',sId:'linkedin', handle:'Fei-Fei Li',      content:'The EU AI Act enforcement begins today. This is a significant moment for AI governance. We need more conversations between researchers, policymakers, and industry.',     timestamp:ago(61),  urg:'ROUTINE',  likes:8120,  reposts:1430, cat:'policy'},
-  {id:'s11', platform:'twitter', sId:'twitter', handle:'@emollick',        content:'New paper: humans with access to frontier AI outperform PhDs without it on complex research tasks by 43%. The "centaur" model (human+AI) is still the most powerful.',   timestamp:ago(73),  urg:'ROUTINE',  likes:5621,  reposts:1241, cat:'research'},
-  {id:'s12', platform:'linkedin',sId:'linkedin', handle:'Greg Brockman',   content:"Back at OpenAI after a sabbatical. Energized and ready. The team has done incredible work — o3, Sora, GPT-4o updates. Excited to build the next chapter.",             timestamp:ago(82),  urg:'ROUTINE',  likes:41230, reposts:7830, cat:'models'},
-  {id:'s13', platform:'twitter', sId:'twitter', handle:'@scaling01',       content:'New eval: MMLU-Pro drops most frontier model scores by 8-12 points. The benchmark treadmill continues. We need harder evals, not better benchmark scores.',             timestamp:ago(95),  urg:'ROUTINE',  likes:1832,  reposts:421,  cat:'research'},
-  {id:'s14', platform:'linkedin',sId:'linkedin', handle:'Mustafa Suleyman',content:"Microsoft Copilot hits 400M monthly active users. AI is no longer a novelty — it's infrastructure. Every knowledge worker will have an AI partner within 18 months.", timestamp:ago(108), urg:'ROUTINE',  likes:18230, reposts:3120, cat:'products'},
-  {id:'s15', platform:'twitter', sId:'twitter', handle:'@GaryMarcus',      content:"OpenAI's $10B raise at $300B valuation is unprecedented. For context: that's 3x the market cap of Boeing.",                                                           timestamp:ago(120), urg:'ROUTINE',  likes:3421,  reposts:876,  cat:'funding'},
-  {id:'s16', platform:'twitter', sId:'twitter', handle:'@simonw',          content:"DeepSeek R2's AIME scores are remarkable for a model of its size. Chinese open-source AI is consistently surprising. The gap is closing faster than expected.",          timestamp:ago(135), urg:'ROUTINE',  likes:2341,  reposts:523,  cat:'models'},
-  {id:'s17', platform:'linkedin',sId:'linkedin', handle:'Reid Hoffman',    content:'The AI investment landscape is bifurcating: infrastructure plays getting institutional capital; application layer remaining fragmented. Exciting decade ahead.',           timestamp:ago(148), urg:'ROUTINE',  likes:11240, reposts:2140, cat:'funding'},
-  {id:'s18', platform:'twitter', sId:'twitter', handle:'@goodside',        content:'Prompt injection attacks on agentic AI systems remain unsolved. As we deploy more autonomous agents, the attack surface grows.',                                         timestamp:ago(163), urg:'ROUTINE',  likes:1832,  reposts:412,  cat:'policy'},
-  {id:'s19', platform:'linkedin',sId:'linkedin', handle:'Susan Li (Meta)', content:"Llama models have been downloaded over 650 million times. Meta's open source bet is paying off at scale.",                                                               timestamp:ago(175), urg:'ROUTINE',  likes:9230,  reposts:1820, cat:'opensource'},
-  {id:'s20', platform:'twitter', sId:'twitter', handle:'@tsarnick',        content:'Hugging Face just crossed 1 million models on the Hub. 6 months ago it was 500k. One new model every 3 minutes.',                                                       timestamp:ago(190), urg:'ROUTINE',  likes:1231,  reposts:287,  cat:'opensource'},
+  {id:'s1',  platform:'twitter', sId:'twitter', handle:'@sama',           url:'https://x.com/sama',           content:"we're getting closer to AGI than most people realize. the next 6 months will be unlike anything we've seen before.",                                                  timestamp:ago(3),   urg:'FLASH',    likes:28431, reposts:6821, cat:'models'},
+  {id:'s2',  platform:'linkedin',sId:'linkedin', handle:'Mark Zuckerberg',url:'https://linkedin.com',          content:'Llama 4 Scout is out now — open source, 512k context window, topping HumanEval at 92.3%. The open source AI movement is winning.',                                    timestamp:ago(7),   urg:'FLASH',    likes:41230, reposts:8340, cat:'opensource'},
+  {id:'s3',  platform:'twitter', sId:'twitter', handle:'@karpathy',       url:'https://x.com/karpathy',        content:'Llama 4 Scout is genuinely impressive. Open weights, 512k context, beats HumanEval — this raises the floor for what "open source" means. Meta is playing for keeps.',  timestamp:ago(12),  urg:'PRIORITY', likes:8921,  reposts:1876, cat:'models'},
+  {id:'s4',  platform:'linkedin',sId:'linkedin', handle:'Dario Amodei',   url:'https://linkedin.com',          content:"Claude 3.7 Sonnet is our most capable model to date. Extended thinking + 200k context enables genuinely new use cases. We're seeing 3x the usage of Sonnet 3.5.",      timestamp:ago(18),  urg:'PRIORITY', likes:22140, reposts:4120, cat:'models'},
+  {id:'s5',  platform:'twitter', sId:'twitter', handle:'@ylecun',         url:'https://x.com/ylecun',          content:'Reminder that all current LLMs (including "reasoning" models) are still fundamentally autocomplete machines. Real AI is elsewhere.',                                   timestamp:ago(24),  urg:'PRIORITY', likes:4532,  reposts:1201, cat:'research'},
+  {id:'s6',  platform:'linkedin',sId:'linkedin', handle:'Jensen Huang',   url:'https://linkedin.com',          content:'The AI infrastructure buildout is accelerating. NVIDIA shipped $14B in data center GPUs last quarter. This is the industrial revolution of our time.',                  timestamp:ago(31),  urg:'PRIORITY', likes:58340, reposts:9210, cat:'products'},
+  {id:'s7',  platform:'twitter', sId:'twitter', handle:'@swyx',           url:'https://x.com/swyx',            content:'Hot take: Claude 3.7 Sonnet with extended thinking is now the best coding model. Beats o3 on SWE-bench for a fraction of the latency.',                                timestamp:ago(38),  urg:'PRIORITY', likes:2341,  reposts:534,  cat:'products'},
+  {id:'s8',  platform:'linkedin',sId:'linkedin', handle:'Satya Nadella',  url:'https://linkedin.com',          content:'GitHub Copilot now has 1.8 million paid subscribers. Teams using Copilot complete PRs 55% faster. The ROI is measurable.',                                             timestamp:ago(44),  urg:'PRIORITY', likes:34120, reposts:6230, cat:'products'},
+  {id:'s9',  platform:'twitter', sId:'twitter', handle:'@elonmusk',       url:'https://x.com/elonmusk',        content:'Grok 3 achieves the highest GPQA score of any frontier model. Congrats to the xAI team — built in under 2 years.',                                                     timestamp:ago(52),  urg:'PRIORITY', likes:89230, reposts:21430,cat:'models'},
+  {id:'s10', platform:'linkedin',sId:'linkedin', handle:'Fei-Fei Li',     url:'https://linkedin.com',          content:'The EU AI Act enforcement begins today. This is a significant moment for AI governance. We need more conversations between researchers, policymakers, and industry.',     timestamp:ago(61),  urg:'ROUTINE',  likes:8120,  reposts:1430, cat:'policy'},
+  {id:'s11', platform:'twitter', sId:'twitter', handle:'@emollick',       url:'https://x.com/emollick',        content:'New paper: humans with access to frontier AI outperform PhDs without it on complex research tasks by 43%. The "centaur" model (human+AI) is still the most powerful.',   timestamp:ago(73),  urg:'ROUTINE',  likes:5621,  reposts:1241, cat:'research'},
+  {id:'s12', platform:'linkedin',sId:'linkedin', handle:'Greg Brockman',  url:'https://linkedin.com',          content:"Back at OpenAI after a sabbatical. Energized and ready. The team has done incredible work — o3, Sora, GPT-4o updates. Excited to build the next chapter.",             timestamp:ago(82),  urg:'ROUTINE',  likes:41230, reposts:7830, cat:'models'},
+  {id:'s13', platform:'twitter', sId:'twitter', handle:'@scaling01',      url:'https://x.com/scaling01',       content:'New eval: MMLU-Pro drops most frontier model scores by 8-12 points. The benchmark treadmill continues. We need harder evals, not better benchmark scores.',             timestamp:ago(95),  urg:'ROUTINE',  likes:1832,  reposts:421,  cat:'research'},
+  {id:'s14', platform:'linkedin',sId:'linkedin', handle:'Mustafa Suleyman',url:'https://linkedin.com',         content:"Microsoft Copilot hits 400M monthly active users. AI is no longer a novelty — it's infrastructure. Every knowledge worker will have an AI partner within 18 months.", timestamp:ago(108), urg:'ROUTINE',  likes:18230, reposts:3120, cat:'products'},
+  {id:'s15', platform:'twitter', sId:'twitter', handle:'@GaryMarcus',     url:'https://x.com/GaryMarcus',      content:"OpenAI's $10B raise at $300B valuation is unprecedented. For context: that's 3x the market cap of Boeing.",                                                           timestamp:ago(120), urg:'ROUTINE',  likes:3421,  reposts:876,  cat:'funding'},
+  {id:'s16', platform:'twitter', sId:'twitter', handle:'@simonw',         url:'https://x.com/simonw',          content:"DeepSeek R2's AIME scores are remarkable for a model of its size. Chinese open-source AI is consistently surprising. The gap is closing faster than expected.",          timestamp:ago(135), urg:'ROUTINE',  likes:2341,  reposts:523,  cat:'models'},
+  {id:'s17', platform:'linkedin',sId:'linkedin', handle:'Reid Hoffman',   url:'https://linkedin.com/in/reidhoffman/', content:'The AI investment landscape is bifurcating: infrastructure plays getting institutional capital; application layer remaining fragmented. Exciting decade ahead.',           timestamp:ago(148), urg:'ROUTINE',  likes:11240, reposts:2140, cat:'funding'},
+  {id:'s18', platform:'twitter', sId:'twitter', handle:'@goodside',       url:'https://x.com/goodside',        content:'Prompt injection attacks on agentic AI systems remain unsolved. As we deploy more autonomous agents, the attack surface grows.',                                         timestamp:ago(163), urg:'ROUTINE',  likes:1832,  reposts:412,  cat:'policy'},
+  {id:'s19', platform:'linkedin',sId:'linkedin', handle:'Susan Li (Meta)',url:'https://linkedin.com',           content:"Llama models have been downloaded over 650 million times. Meta's open source bet is paying off at scale.",                                                               timestamp:ago(175), urg:'ROUTINE',  likes:9230,  reposts:1820, cat:'opensource'},
+  {id:'s20', platform:'twitter', sId:'twitter', handle:'@tsarnick',       url:'https://x.com/tsarnick',        content:'Hugging Face just crossed 1 million models on the Hub. 6 months ago it was 500k. One new model every 3 minutes.',                                                       timestamp:ago(190), urg:'ROUTINE',  likes:1231,  reposts:287,  cat:'opensource'},
 ];
 
 const SRC_C = {
@@ -1059,6 +1059,7 @@ function SocialPost({post, kws}) {
   const isReddit = post.platform === 'reddit';
   const isLI     = post.platform === 'linkedin';
   const urgCls   = post.urg==='FLASH'?' fl':post.urg==='PRIORITY'?' pr':'';
+  // Reddit live posts: permalink = thread URL; demo posts: url = profile URL
   const link     = post.permalink || post.url || null;
 
   const badge = isReddit
@@ -1066,9 +1067,11 @@ function SocialPost({post, kws}) {
     : <span className={`sp-plat ${isLI?'li':'x'}`}>{isLI?'LI':'X'}</span>;
 
   return (
-    <div className={`sp${urgCls}`}
-      style={link ? {cursor:'pointer'} : {}}
-      onClick={()=>link && window.open(link,'_blank','noopener,noreferrer')}>
+    <a className={`sp${urgCls}`}
+      href={link || undefined}
+      target="_blank"
+      rel="noopener noreferrer"
+      style={{display:'block', textDecoration:'none', color:'inherit'}}>
       <div className="sp-top">
         {badge}
         <span className="sp-handle">{post.handle}</span>
@@ -1084,7 +1087,7 @@ function SocialPost({post, kws}) {
         <span className="sp-eng" style={{color:'var(--td)'}}>💬 {fmtNum(post.reposts)}</span>
         <span className="sp-tag">{post.cat}</span>
       </div>
-    </div>
+    </a>
   );
 }
 
