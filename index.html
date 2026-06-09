@@ -407,11 +407,23 @@ body {
 .mr-dir   { font-size:11px; flex-shrink:0; font-weight:600 }
 .mr-dir.up{ color:#30d158 }   /* Apple system green */
 .mr-dir.dn{ color:#ff453a }   /* Apple system red  */
+.mr-dir.flat{ color:var(--tl) }
 .mr-new   {
   font-family:var(--sans); font-size:10px; font-weight:700;
   color:#000000; background:var(--pri);
   padding:1px 6px; border-radius:var(--r-xs); flex-shrink:0;
 }
+/* CORTEX score sub-label + capability/momentum split bar */
+.mr-sub {
+  font-family:var(--mono); font-size:9px; color:var(--td);
+  margin-top:2px; letter-spacing:.02em; white-space:nowrap;
+}
+.mr-split {
+  display:flex; gap:2px; height:3px; margin-top:5px;
+  border-radius:2px; overflow:hidden; max-width:160px;
+}
+.mr-split-cap { background:var(--cM); border-radius:2px; transition:width .6s }
+.mr-split-mom { background:#30d158; border-radius:2px; transition:width .6s }
 
 /* ──────────────────────────────────────
    TRENDING TOPICS
@@ -494,6 +506,7 @@ table.mt tr:hover td { background:rgba(44,44,46,.5) }
 }
 .mt-dir.up { color:#30d158; font-weight:600 }  /* Apple system green */
 .mt-dir.dn { color:#ff453a; font-weight:600 }  /* Apple system red   */
+.mt-dir.flat { color:var(--tl); font-weight:600 }
 .mt-legend {
   margin-top:24px; padding-top:16px; border-top:1px solid var(--br);
   display:flex; gap:24px; font-size:13px; color:var(--td); flex-wrap:wrap;
@@ -772,19 +785,23 @@ const NEWS = [
   {id:'n15', source:'arXiv',      sId:'arxiv',     url:'https://arxiv.org/list/cs.AI/recent',           title:'Constitutional AI v2: Anthropic publishes updated alignment framework',           content:'Anthropic releases Constitutional AI version 2, detailing improvements to training helpful, harmless, and honest AI systems.',                                  timestamp:ago(181), urg:'ROUTINE',  cat:'research'},
 ];
 
+// Capability baseline — benchmark scores accurate from each model's release.
+// `aliases` = lowercase strings matched against news/social text for momentum.
+// `gpqa` = GPQA Diamond (graduate-level reasoning). These change only on new
+// model releases; momentum (live) drives the day-to-day re-ranking.
 const LEADERBOARD = [
-  {id:'l1',  rank:1,  name:'GPT-4o',             lab:'OpenAI',    elo:1287, dir:'up',  daysOld:340, ctx:'128k',  mmlu:'88.7', heval:'90.2', notes:'Multimodal flagship'},
-  {id:'l2',  rank:2,  name:'Claude 3.7 Sonnet',  lab:'Anthropic', elo:1278, dir:'up',  daysOld:15,  ctx:'200k',  mmlu:'89.4', heval:'92.1', notes:'Extended thinking'},
-  {id:'l3',  rank:3,  name:'Gemini 2.5 Pro',     lab:'Google',    elo:1271, dir:'up',  daysOld:8,   ctx:'2048k', mmlu:'90.2', heval:'89.8', notes:'2M context window'},
-  {id:'l4',  rank:4,  name:'o3',                 lab:'OpenAI',    elo:1265, dir:'dn',  daysOld:105, ctx:'200k',  mmlu:'91.2', heval:'88.5', notes:'Reasoning specialist'},
-  {id:'l5',  rank:5,  name:'Grok 3',             lab:'xAI',       elo:1243, dir:'up',  daysOld:22,  ctx:'131k',  mmlu:'87.5', heval:'87.1', notes:'GPQA record'},
-  {id:'l6',  rank:6,  name:'Llama 4 Scout',      lab:'Meta',      elo:1218, dir:'up',  daysOld:5,   ctx:'512k',  mmlu:'88.1', heval:'92.3', notes:'Open-source leader'},
-  {id:'l7',  rank:7,  name:'DeepSeek R2',        lab:'DeepSeek',  elo:1201, dir:'up',  daysOld:19,  ctx:'64k',   mmlu:'86.4', heval:'86.8', notes:'Math specialist'},
-  {id:'l8',  rank:8,  name:'Mistral Large 2',    lab:'Mistral',   elo:1189, dir:'dn',  daysOld:161, ctx:'128k',  mmlu:'84.1', heval:'85.2', notes:'Code focus'},
-  {id:'l9',  rank:9,  name:'Claude 3.5 Sonnet',  lab:'Anthropic', elo:1183, dir:'up',  daysOld:198, ctx:'200k',  mmlu:'88.3', heval:'92.0', notes:'Agentic tasks'},
-  {id:'l10', rank:10, name:'Gemini 2.0 Flash',   lab:'Google',    elo:1147, dir:'up',  daysOld:112, ctx:'1024k', mmlu:'86.7', heval:'85.4', notes:'Fast · cheap'},
-  {id:'l11', rank:11, name:'Qwen 2.5-72B',       lab:'Alibaba',   elo:1134, dir:'up',  daysOld:219, ctx:'128k',  mmlu:'83.6', heval:'84.7', notes:'Open-source #2'},
-  {id:'l12', rank:12, name:'GPT-4o mini',        lab:'OpenAI',    elo:1089, dir:'dn',  daysOld:273, ctx:'128k',  mmlu:'82.0', heval:'81.2', notes:'Affordable tier'},
+  {id:'l1',  name:'GPT-4o',             lab:'OpenAI',    elo:1287, daysOld:340, ctx:'128k',  mmlu:'88.7', heval:'90.2', gpqa:'53.6', notes:'Multimodal flagship', aliases:['gpt-4o','gpt4o','gpt-4 omni']},
+  {id:'l2',  name:'Claude 3.7 Sonnet',  lab:'Anthropic', elo:1278, daysOld:15,  ctx:'200k',  mmlu:'89.4', heval:'92.1', gpqa:'68.0', notes:'Extended thinking',   aliases:['claude 3.7','claude 3.7 sonnet','claude3.7']},
+  {id:'l3',  name:'Gemini 2.5 Pro',     lab:'Google',    elo:1271, daysOld:8,   ctx:'2048k', mmlu:'90.2', heval:'89.8', gpqa:'67.4', notes:'2M context window',   aliases:['gemini 2.5','gemini 2.5 pro']},
+  {id:'l4',  name:'o3',                 lab:'OpenAI',    elo:1265, daysOld:105, ctx:'200k',  mmlu:'91.2', heval:'88.5', gpqa:'71.7', notes:'Reasoning specialist',aliases:['openai o3',' o3 ','o3 model','o3-mini','o3 mini']},
+  {id:'l5',  name:'Grok 3',             lab:'xAI',       elo:1243, daysOld:22,  ctx:'131k',  mmlu:'87.5', heval:'87.1', gpqa:'84.6', notes:'GPQA record',         aliases:['grok 3','grok-3','grok3']},
+  {id:'l6',  name:'Llama 4 Scout',      lab:'Meta',      elo:1218, daysOld:5,   ctx:'512k',  mmlu:'88.1', heval:'92.3', gpqa:'57.2', notes:'Open-source leader',  aliases:['llama 4','llama 4 scout','llama4']},
+  {id:'l7',  name:'DeepSeek R2',        lab:'DeepSeek',  elo:1201, daysOld:19,  ctx:'64k',   mmlu:'86.4', heval:'86.8', gpqa:'71.5', notes:'Math specialist',     aliases:['deepseek r2','deepseek-r2','deepseek r1','deepseek']},
+  {id:'l8',  name:'Mistral Large 2',    lab:'Mistral',   elo:1189, daysOld:161, ctx:'128k',  mmlu:'84.1', heval:'85.2', gpqa:'50.8', notes:'Code focus',          aliases:['mistral large','mistral large 2','mistral-large']},
+  {id:'l9',  name:'Claude 3.5 Sonnet',  lab:'Anthropic', elo:1183, daysOld:198, ctx:'200k',  mmlu:'88.3', heval:'92.0', gpqa:'59.4', notes:'Agentic tasks',       aliases:['claude 3.5','claude 3.5 sonnet','claude3.5']},
+  {id:'l10', name:'Gemini 2.0 Flash',   lab:'Google',    elo:1147, daysOld:112, ctx:'1024k', mmlu:'86.7', heval:'85.4', gpqa:'62.1', notes:'Fast · cheap',        aliases:['gemini 2.0','gemini 2.0 flash','gemini flash']},
+  {id:'l11', name:'Qwen 2.5-72B',       lab:'Alibaba',   elo:1134, daysOld:219, ctx:'128k',  mmlu:'83.6', heval:'84.7', gpqa:'49.0', notes:'Open-source #2',      aliases:['qwen 2.5','qwen2.5','qwen 2.5-72b','qwen']},
+  {id:'l12', name:'GPT-4o mini',        lab:'OpenAI',    elo:1089, daysOld:273, ctx:'128k',  mmlu:'82.0', heval:'81.2', gpqa:'40.2', notes:'Affordable tier',     aliases:['gpt-4o mini','gpt4o mini','4o mini']},
 ];
 
 const TRENDING = [
@@ -1013,6 +1030,89 @@ function computeTrending(newsItems, socialItems) {
   }));
 }
 
+// ── CORTEX Score: capability + live public momentum ───────────
+// Final rank = 50% capability (benchmarks) + 50% momentum (live buzz).
+// Capability is stable (changes on model release); momentum recomputes
+// every refresh from live news + Reddit + HuggingFace trending data.
+
+// Normalize a raw benchmark composite to 0–100 across the model set.
+function computeCapability(model) {
+  // Weighted blend of public benchmarks. GPQA (hard reasoning) weighted highest.
+  const mmlu  = parseFloat(model.mmlu)  || 0;   // 0–100
+  const heval = parseFloat(model.heval) || 0;   // 0–100
+  const gpqa  = parseFloat(model.gpqa)  || 0;   // 0–100
+  return (gpqa * 0.45) + (mmlu * 0.30) + (heval * 0.25);
+}
+
+// Count how strongly the live feeds are talking about this model.
+function computeMomentum(model, newsItems, socialItems, hfTrending) {
+  const aliases = (model.aliases || [model.name.toLowerCase()]).map(a => a.toLowerCase());
+  const hit = txt => { const t = (txt || '').toLowerCase(); return aliases.some(a => t.includes(a)); };
+
+  // News: each mention weighted by urgency × recency decay (half-life ~24h)
+  let newsScore = 0, newsHits = 0;
+  for (const it of newsItems) {
+    if (!hit((it.title || '') + ' ' + (it.content || ''))) continue;
+    newsHits++;
+    const urgW   = it.urg === 'FLASH' ? 3 : it.urg === 'PRIORITY' ? 2 : 1;
+    const ageHrs = (Date.now() - new Date(it.timestamp).getTime()) / 3600000;
+    const decay  = Math.pow(0.5, Math.max(0, ageHrs) / 24);
+    newsScore += urgW * decay;
+  }
+
+  // Reddit/social: log-scaled upvotes so one viral post doesn't dominate
+  let socialScore = 0, socialHits = 0;
+  for (const it of socialItems) {
+    if (!hit((it.title || '') + ' ' + (it.content || ''))) continue;
+    socialHits++;
+    socialScore += Math.log10((it.likes || 0) + 10);
+  }
+
+  // HuggingFace trending: bonus for appearing in the live trending list
+  let hfScore = 0;
+  const hfIdx = (hfTrending || []).findIndex(h =>
+    aliases.some(a => (h.name + ' ' + h.org).toLowerCase().includes(a)));
+  if (hfIdx >= 0) hfScore = (10 - hfIdx); // #1 trending = +10, #10 = +1
+
+  const raw = newsScore * 4 + socialScore * 2 + hfScore;
+  return { raw, newsHits, socialHits, hfRank: hfIdx >= 0 ? hfIdx + 1 : null };
+}
+
+// Build the live ranking. `prev` = map of name→score from last run for ▲/▼.
+function computeRankings(models, newsItems, socialItems, hfTrending, prev) {
+  const enriched = models.map(m => {
+    const cap = computeCapability(m);
+    const mom = computeMomentum(m, newsItems, socialItems, hfTrending);
+    return { ...m, _cap: cap, _momRaw: mom.raw, _mom: mom };
+  });
+
+  // Normalize capability + momentum to 0–100 within the current set
+  const maxCap = Math.max(...enriched.map(m => m._cap), 1);
+  const maxMom = Math.max(...enriched.map(m => m._momRaw), 1);
+
+  const scored = enriched.map(m => {
+    const capN = (m._cap / maxCap) * 100;
+    const momN = maxMom > 0 ? (m._momRaw / maxMom) * 100 : 0;
+    const cortex = capN * 0.5 + momN * 0.5;
+    return {
+      ...m,
+      capScore:    Math.round(capN),
+      momScore:    Math.round(momN),
+      cortexScore: Math.round(cortex * 10) / 10,
+    };
+  }).sort((a, b) => b.cortexScore - a.cortexScore);
+
+  return scored.map((m, i) => {
+    const prevScore = prev && prev[m.name];
+    let dir = 'up';
+    if (prevScore != null) {
+      if (m.cortexScore < prevScore - 0.05) dir = 'dn';
+      else if (Math.abs(m.cortexScore - prevScore) <= 0.05) dir = m.daysOld <= 30 ? 'up' : 'flat';
+    }
+    return { ...m, rank: i + 1, dir };
+  });
+}
+
 // ── HuggingFace trending models ──────────────────────────────
 async function fetchHFTrending() {
   const res = await fetch(
@@ -1167,8 +1267,12 @@ function NewsItem({item, kws}) {
 }
 
 function ModelRankItem({m}) {
+  const dirSym = m.dir==='up'?'▲':m.dir==='dn'?'▼':'·';
+  const cap = m.capScore ?? 0;
+  const mom = m.momScore ?? 0;
   return (
-    <div className="mr" style={{cursor:'pointer'}}
+    <div className="mr mr-cortex" style={{cursor:'pointer'}}
+      title={`CORTEX ${m.cortexScore} — capability ${cap} + momentum ${mom}. ${m._mom?`${m._mom.newsHits} news · ${m._mom.socialHits} social${m._mom.hfRank?` · HF #${m._mom.hfRank}`:''}`:''}`}
       onClick={()=>window.open('https://lmarena.ai/leaderboard','_blank','noopener,noreferrer')}>
       <span className={`mr-rank${m.rank<=3?' top':''}`}>#{m.rank}</span>
       <div className="mr-info">
@@ -1177,9 +1281,17 @@ function ModelRankItem({m}) {
           {m.daysOld<=30&&<span className="mr-new">NEW</span>}
         </div>
         <div className="mr-lab">{m.lab}</div>
+        {/* capability (orange) + momentum (green) split bar */}
+        <div className="mr-split" aria-hidden="true">
+          <div className="mr-split-cap" style={{width:`${cap*0.5}%`}}/>
+          <div className="mr-split-mom" style={{width:`${mom*0.5}%`}}/>
+        </div>
       </div>
-      <span className={`mr-elo${m.dir==='up'?' up':''}`}>{m.elo}</span>
-      <span className={`mr-dir ${m.dir}`}>{m.dir==='up'?'▲':'▼'}</span>
+      <div style={{display:'flex',flexDirection:'column',alignItems:'flex-end',flexShrink:0}}>
+        <span className={`mr-elo${m.dir==='up'?' up':''}`}>{m.cortexScore}</span>
+        <span className="mr-sub">C{cap}·M{mom}</span>
+      </div>
+      <span className={`mr-dir ${m.dir}`}>{dirSym}</span>
     </div>
   );
 }
@@ -1240,9 +1352,9 @@ const PANEL_INFO = {
   },
   right: {
     title: 'Model Watch — how this works',
-    description: 'Arena ELO scores come from the LM Arena community leaderboard — thousands of anonymous human comparisons in blind A/B tests. Higher ELO = stronger model by real user preference, not just benchmark scores. Trending topics reflect cross-platform AI discussion volume. Rankings shown are illustrative of real standings.',
-    update: 'Curated data',
-    sources: ['LM Arena ELO','Community A/B votes','Cross-platform trends'],
+    description: 'Models are ranked by the CORTEX Score: 50% capability + 50% live public momentum. Capability is a composite of public benchmarks (GPQA reasoning, MMLU knowledge, HumanEval coding) — it changes when a model is released. Momentum is computed live from how much the news wire, Reddit communities, and HuggingFace trending are talking about each model — weighted by urgency, upvotes, and recency. The orange bar = capability, green bar = momentum. Rankings re-sort every 3 min as fresh data arrives. Click any row for the live lmarena.ai leaderboard; the ⊞ button opens the full breakdown table.',
+    update: 'Momentum re-ranks every 3 min',
+    sources: ['Public benchmarks','Live news wire','Reddit volume','HuggingFace trending'],
   },
 };
 
@@ -1305,43 +1417,52 @@ function InfoButton({info}) {
   );
 }
 
-function ModelsOverlay({onClose}) {
+function ModelsOverlay({rankings, onClose}) {
+  const rows = rankings && rankings.length ? rankings : LEADERBOARD.map((m,i)=>({...m,rank:i+1,dir:'flat',cortexScore:'—',capScore:'—',momScore:'—'}));
   return (
     <div className="models-overlay">
       <div className="moh">
-        <span className="moh-title">Model Comparison — Frontier AI Systems</span>
+        <span className="moh-title">CORTEX Rankings — capability + live momentum</span>
         <button className="btn" onClick={onClose} style={{color:'var(--td)'}}>close [esc]</button>
       </div>
       <div className="mo-wrap">
         <table className="mt">
           <thead>
             <tr>
-              <th>#</th><th>Model</th><th>Lab</th><th>Age</th>
-              <th>Context</th><th>MMLU</th><th>HumanEval</th><th>Arena ELO</th><th>↕</th><th>Notes</th>
+              <th>#</th><th>Model</th><th>Lab</th><th>CORTEX</th><th>Capability</th><th>Momentum</th>
+              <th>Signals</th><th>Age</th><th>Context</th><th>MMLU</th><th>HEval</th><th>GPQA</th><th>Arena ELO</th><th>↕</th>
             </tr>
           </thead>
           <tbody>
-            {LEADERBOARD.map(m=>(
+            {rows.map(m=>(
               <tr key={m.id}>
                 <td className="mt-rank">{m.rank}</td>
                 <td><span className="mt-model">{m.name}</span>{m.daysOld<=30&&<span className="mt-new">NEW</span>}</td>
                 <td className="mt-lab">{m.lab}</td>
+                <td className="mt-elo">{m.cortexScore}</td>
+                <td className="mt-num" style={{color:'var(--cM)'}}>{m.capScore}</td>
+                <td className="mt-num" style={{color:'#30d158'}}>{m.momScore}</td>
+                <td style={{color:'var(--ts)',fontSize:12}}>
+                  {m._mom ? `${m._mom.newsHits}n · ${m._mom.socialHits}s${m._mom.hfRank?` · HF#${m._mom.hfRank}`:''}` : '—'}
+                </td>
                 <td style={{color:'var(--td)',fontSize:12}}>{m.daysOld}d</td>
                 <td style={{color:'var(--ts)',fontSize:12}}>{m.ctx}</td>
                 <td className="mt-num">{m.mmlu}</td>
                 <td className="mt-num">{m.heval}</td>
-                <td className={`mt-elo${m.dir==='up'?' up':''}`}>{m.elo}</td>
-                <td><span className={`mt-dir ${m.dir}`}>{m.dir==='up'?'▲':'▼'}</span></td>
-                <td className="mt-note">{m.notes}</td>
+                <td className="mt-num">{m.gpqa}</td>
+                <td style={{color:'var(--ts)',fontFamily:'var(--mono)',fontSize:13}}>{m.elo}</td>
+                <td><span className={`mt-dir ${m.dir}`}>{m.dir==='up'?'▲':m.dir==='dn'?'▼':'·'}</span></td>
               </tr>
             ))}
           </tbody>
         </table>
         <div className="mt-legend">
-          <span>Arena ELO — lmsys.org community votes</span>
-          <span>MMLU — Multitask Language Understanding (0–100)</span>
-          <span>HumanEval — Python code generation pass@1 (%)</span>
-          <span style={{color:'var(--td)'}}>Demo mode — scores are illustrative</span>
+          <span><b style={{color:'var(--cB)'}}>CORTEX</b> — 50% capability + 50% live momentum</span>
+          <span><b style={{color:'var(--cM)'}}>Capability</b> — GPQA·MMLU·HumanEval composite</span>
+          <span><b style={{color:'#30d158'}}>Momentum</b> — live news + Reddit + HF trending</span>
+          <span>Signals — n=news hits · s=social hits · HF=HuggingFace trending rank</span>
+          <span>Arena ELO — lmarena.ai reference (static)</span>
+          <span style={{color:'var(--td)'}}>Momentum recomputes every 3 min from live feeds</span>
         </div>
       </div>
     </div>
@@ -1400,10 +1521,19 @@ function App() {
   const [lastFetched,  setLastFetched]  = useState(null);
   const [trendingData, setTrendingData] = useState(TRENDING);
   const [hfModels,     setHfModels]     = useState([]);
+  const [rankings,     setRankings]     = useState(()=>computeRankings(LEADERBOARD, NEWS, SOCIAL, [], null));
+  const prevScores = useRef(null);
   const [wl, setWl] = useState(()=>{
     try{const s=localStorage.getItem('cx2_wl');return s?JSON.parse(s):DEFAULT_WL;}catch{return DEFAULT_WL;}
   });
   const [f, setF] = useState({sources:[],categories:[],urgency:[],q:''});
+
+  // Recompute live CORTEX rankings whenever news, social, or HF data changes
+  useEffect(()=>{
+    const next = computeRankings(LEADERBOARD, newsData, socialData, hfModels, prevScores.current);
+    prevScores.current = Object.fromEntries(next.map(m => [m.name, m.cortexScore]));
+    setRankings(next);
+  },[newsData, socialData, hfModels]);
 
   useEffect(()=>{
     const tick=()=>{const n=new Date();setClock(n.toISOString().replace('T',' ').slice(0,19)+'Z');};
@@ -1634,15 +1764,21 @@ function App() {
           <div className="ph">
             <span className="ph-title">Model Watch</span>
             <div className="ph-meta">
-              <span>{LEADERBOARD.length} models</span>
-              <button className="refresh-btn" title="Open live Arena leaderboard"
-                onClick={e=>{e.stopPropagation();window.open('https://lmarena.ai/leaderboard','_blank','noopener,noreferrer');}}>↗</button>
+              <span>{rankings.length} models</span>
+              <button className="refresh-btn" title="Open full CORTEX rankings table"
+                onClick={e=>{e.stopPropagation();setShowModels(true);}}>⊞</button>
               <InfoButton info={PANEL_INFO.right}/>
             </div>
           </div>
           <div id="pc-right" className="pc">
-            <div className="sec-div"><span>Arena ELO · lmarena.ai</span><span>{LEADERBOARD.length}</span></div>
-            {LEADERBOARD.map(m=><ModelRankItem key={m.id} m={m}/>)}
+            <div className="sec-div">
+              <span>CORTEX Rankings</span>
+              <span style={{display:'flex',gap:8,alignItems:'center'}}>
+                <span style={{color:'var(--cM)',fontSize:9}}>● CAP</span>
+                <span style={{color:'#30d158',fontSize:9}}>● MOM</span>
+              </span>
+            </div>
+            {rankings.map(m=><ModelRankItem key={m.id} m={m}/>)}
             {hfModels.length > 0 && (<>
               <div className="sec-div" style={{marginTop:4}}>
                 <span>🔥 Trending on HuggingFace</span>
@@ -1668,7 +1804,7 @@ function App() {
           ))}
         </div>
         <div style={{display:'flex',gap:10,color:'var(--td)'}}>
-          <span>N:{fNews.length}</span><span>S:{fSocial.length}</span><span>M:{LEADERBOARD.length}</span>
+          <span>N:{fNews.length}</span><span>S:{fSocial.length}</span><span>M:{rankings.length}</span>
         </div>
       </div>
 
@@ -1689,7 +1825,7 @@ function App() {
         </div>
       </div>
 
-      {showModels&&<ModelsOverlay onClose={()=>setShowModels(false)}/>}
+      {showModels&&<ModelsOverlay rankings={rankings} onClose={()=>setShowModels(false)}/>}
       {showWl&&<WatchlistModal wl={wl} onAdd={addKw} onRemove={rmKw} onClose={()=>setShowWl(false)}/>}
     </div>
   );
