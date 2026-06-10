@@ -700,13 +700,12 @@ table.mt tr:hover td { background:rgba(44,44,46,.5) }
 </head>
 <body>
 <div id="root"></div>
-<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script crossorigin="anonymous" integrity="sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z" src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+<script crossorigin="anonymous" integrity="sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1" src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<script crossorigin="anonymous" integrity="sha384-x/ilTFv/u/eu6YSmkFDZl5V5Mm/pkxxcVv2cVJOrr1J0rvILhMvRBCy6yA75wYBj" src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"></script>
 <script type="text/babel">
 const { useState, useEffect, useMemo, useRef } = React;
 
-const ago = m => new Date(Date.now() - m * 60000).toISOString();
 function timeAgo(iso) {
   const d = (Date.now() - new Date(iso).getTime()) / 1000;
   if (d < 60)    return `${Math.floor(d)}s`;
@@ -734,29 +733,6 @@ function fmtNum(n) {
 const URG_O = {FLASH:0,PRIORITY:1,ROUTINE:2};
 const URG_SYM = {FLASH:'⚡',PRIORITY:'▲',ROUTINE:'·'};
 
-// ── Data ─────────────────────────────────────────────────────
-const SOCIAL = [
-  {id:'s1',  platform:'twitter', sId:'twitter', handle:'@sama',           url:'https://x.com/sama',           content:"we're getting closer to AGI than most people realize. the next 6 months will be unlike anything we've seen before.",                                                  timestamp:ago(3),   urg:'FLASH',    likes:28431, reposts:6821, cat:'models'},
-  {id:'s2',  platform:'linkedin',sId:'linkedin', handle:'Mark Zuckerberg',url:'https://linkedin.com',          content:'Llama 4 Scout is out now — open source, 512k context window, topping HumanEval at 92.3%. The open source AI movement is winning.',                                    timestamp:ago(7),   urg:'FLASH',    likes:41230, reposts:8340, cat:'opensource'},
-  {id:'s3',  platform:'twitter', sId:'twitter', handle:'@karpathy',       url:'https://x.com/karpathy',        content:'Llama 4 Scout is genuinely impressive. Open weights, 512k context, beats HumanEval — this raises the floor for what "open source" means. Meta is playing for keeps.',  timestamp:ago(12),  urg:'PRIORITY', likes:8921,  reposts:1876, cat:'models'},
-  {id:'s4',  platform:'linkedin',sId:'linkedin', handle:'Dario Amodei',   url:'https://linkedin.com',          content:"Claude 3.7 Sonnet is our most capable model to date. Extended thinking + 200k context enables genuinely new use cases. We're seeing 3x the usage of Sonnet 3.5.",      timestamp:ago(18),  urg:'PRIORITY', likes:22140, reposts:4120, cat:'models'},
-  {id:'s5',  platform:'twitter', sId:'twitter', handle:'@ylecun',         url:'https://x.com/ylecun',          content:'Reminder that all current LLMs (including "reasoning" models) are still fundamentally autocomplete machines. Real AI is elsewhere.',                                   timestamp:ago(24),  urg:'PRIORITY', likes:4532,  reposts:1201, cat:'research'},
-  {id:'s6',  platform:'linkedin',sId:'linkedin', handle:'Jensen Huang',   url:'https://linkedin.com',          content:'The AI infrastructure buildout is accelerating. NVIDIA shipped $14B in data center GPUs last quarter. This is the industrial revolution of our time.',                  timestamp:ago(31),  urg:'PRIORITY', likes:58340, reposts:9210, cat:'products'},
-  {id:'s7',  platform:'twitter', sId:'twitter', handle:'@swyx',           url:'https://x.com/swyx',            content:'Hot take: Claude 3.7 Sonnet with extended thinking is now the best coding model. Beats o3 on SWE-bench for a fraction of the latency.',                                timestamp:ago(38),  urg:'PRIORITY', likes:2341,  reposts:534,  cat:'products'},
-  {id:'s8',  platform:'linkedin',sId:'linkedin', handle:'Satya Nadella',  url:'https://linkedin.com',          content:'GitHub Copilot now has 1.8 million paid subscribers. Teams using Copilot complete PRs 55% faster. The ROI is measurable.',                                             timestamp:ago(44),  urg:'PRIORITY', likes:34120, reposts:6230, cat:'products'},
-  {id:'s9',  platform:'twitter', sId:'twitter', handle:'@elonmusk',       url:'https://x.com/elonmusk',        content:'Grok 3 achieves the highest GPQA score of any frontier model. Congrats to the xAI team — built in under 2 years.',                                                     timestamp:ago(52),  urg:'PRIORITY', likes:89230, reposts:21430,cat:'models'},
-  {id:'s10', platform:'linkedin',sId:'linkedin', handle:'Fei-Fei Li',     url:'https://linkedin.com',          content:'The EU AI Act enforcement begins today. This is a significant moment for AI governance. We need more conversations between researchers, policymakers, and industry.',     timestamp:ago(61),  urg:'ROUTINE',  likes:8120,  reposts:1430, cat:'policy'},
-  {id:'s11', platform:'twitter', sId:'twitter', handle:'@emollick',       url:'https://x.com/emollick',        content:'New paper: humans with access to frontier AI outperform PhDs without it on complex research tasks by 43%. The "centaur" model (human+AI) is still the most powerful.',   timestamp:ago(73),  urg:'ROUTINE',  likes:5621,  reposts:1241, cat:'research'},
-  {id:'s12', platform:'linkedin',sId:'linkedin', handle:'Greg Brockman',  url:'https://linkedin.com',          content:"Back at OpenAI after a sabbatical. Energized and ready. The team has done incredible work — o3, Sora, GPT-4o updates. Excited to build the next chapter.",             timestamp:ago(82),  urg:'ROUTINE',  likes:41230, reposts:7830, cat:'models'},
-  {id:'s13', platform:'twitter', sId:'twitter', handle:'@scaling01',      url:'https://x.com/scaling01',       content:'New eval: MMLU-Pro drops most frontier model scores by 8-12 points. The benchmark treadmill continues. We need harder evals, not better benchmark scores.',             timestamp:ago(95),  urg:'ROUTINE',  likes:1832,  reposts:421,  cat:'research'},
-  {id:'s14', platform:'linkedin',sId:'linkedin', handle:'Mustafa Suleyman',url:'https://linkedin.com',         content:"Microsoft Copilot hits 400M monthly active users. AI is no longer a novelty — it's infrastructure. Every knowledge worker will have an AI partner within 18 months.", timestamp:ago(108), urg:'ROUTINE',  likes:18230, reposts:3120, cat:'products'},
-  {id:'s15', platform:'twitter', sId:'twitter', handle:'@GaryMarcus',     url:'https://x.com/GaryMarcus',      content:"OpenAI's $10B raise at $300B valuation is unprecedented. For context: that's 3x the market cap of Boeing.",                                                           timestamp:ago(120), urg:'ROUTINE',  likes:3421,  reposts:876,  cat:'funding'},
-  {id:'s16', platform:'twitter', sId:'twitter', handle:'@simonw',         url:'https://x.com/simonw',          content:"DeepSeek R2's AIME scores are remarkable for a model of its size. Chinese open-source AI is consistently surprising. The gap is closing faster than expected.",          timestamp:ago(135), urg:'ROUTINE',  likes:2341,  reposts:523,  cat:'models'},
-  {id:'s17', platform:'linkedin',sId:'linkedin', handle:'Reid Hoffman',   url:'https://linkedin.com/in/reidhoffman/', content:'The AI investment landscape is bifurcating: infrastructure plays getting institutional capital; application layer remaining fragmented. Exciting decade ahead.',           timestamp:ago(148), urg:'ROUTINE',  likes:11240, reposts:2140, cat:'funding'},
-  {id:'s18', platform:'twitter', sId:'twitter', handle:'@goodside',       url:'https://x.com/goodside',        content:'Prompt injection attacks on agentic AI systems remain unsolved. As we deploy more autonomous agents, the attack surface grows.',                                         timestamp:ago(163), urg:'ROUTINE',  likes:1832,  reposts:412,  cat:'policy'},
-  {id:'s19', platform:'linkedin',sId:'linkedin', handle:'Susan Li (Meta)',url:'https://linkedin.com',           content:"Llama models have been downloaded over 650 million times. Meta's open source bet is paying off at scale.",                                                               timestamp:ago(175), urg:'ROUTINE',  likes:9230,  reposts:1820, cat:'opensource'},
-  {id:'s20', platform:'twitter', sId:'twitter', handle:'@tsarnick',       url:'https://x.com/tsarnick',        content:'Hugging Face just crossed 1 million models on the Hub. 6 months ago it was 500k. One new model every 3 minutes.',                                                       timestamp:ago(190), urg:'ROUTINE',  likes:1231,  reposts:287,  cat:'opensource'},
-];
 
 const SRC_C = {
   'The Verge':'#d4622a','TechCrunch':'#c84818','Bloomberg':'#3870cc',
@@ -767,23 +743,6 @@ const SRC_C = {
   VentureBeat:'#7b5ea7',
 };
 
-const NEWS = [
-  {id:'n1',  source:'The Verge',  sId:'mainstream',url:'https://www.theverge.com/ai-artificial-intelligence',         title:'Anthropic ships Claude 3.7 Sonnet with extended thinking mode',                    content:'Anthropic released Claude 3.7 Sonnet with an optional extended thinking mode that dramatically improves reasoning on complex tasks.',                             timestamp:ago(4),   urg:'FLASH',    cat:'models'},
-  {id:'n2',  source:'TechCrunch', sId:'mainstream',url:'https://techcrunch.com/category/artificial-intelligence/',    title:"Meta's Llama 4 Scout tops HumanEval at 92.3%, beats closed models",               content:'Meta released Llama 4 Scout under an open license. The model scores 92.3% on HumanEval, outperforming GPT-4o and Claude 3.5 Sonnet.',                          timestamp:ago(9),   urg:'FLASH',    cat:'models'},
-  {id:'n3',  source:'Bloomberg',  sId:'mainstream',url:'https://www.bloomberg.com/technology',                        title:'OpenAI closes $10B Series F at $300B valuation — largest private tech raise ever', content:'OpenAI raised $10 billion, pushing its valuation to $300 billion. Led by SoftBank Vision Fund with participation from existing investors.',                  timestamp:ago(16),  urg:'FLASH',    cat:'funding'},
-  {id:'n4',  source:'Wired',      sId:'mainstream',url:'https://www.wired.com/tag/artificial-intelligence/',          title:'Google DeepMind releases Gemini 2.5 Pro with 2 million token context window',      content:'Gemini 2.5 Pro features an unprecedented 2M token context window, enabling processing of entire codebases or hours of video in a single pass.',             timestamp:ago(28),  urg:'PRIORITY', cat:'models'},
-  {id:'n5',  source:'TechCrunch', sId:'mainstream',url:'https://techcrunch.com/category/artificial-intelligence/',    title:"xAI's Grok 3 claims top GPQA benchmark score",                                    content:"Grok 3 achieved an 84.6% score on GPQA Diamond, the highest recorded for any frontier model on that evaluation.",                                              timestamp:ago(37),  urg:'PRIORITY', cat:'models'},
-  {id:'n6',  source:'arXiv',      sId:'arxiv',     url:'https://arxiv.org/list/cs.AI/recent',                        title:'DeepSeek R2: 78.3% on AIME 2025 with novel chain-of-thought scaling',             content:'DeepSeek researchers publish R2 technical report. The model achieves state-of-the-art on mathematical reasoning benchmarks.',                                   timestamp:ago(49),  urg:'PRIORITY', cat:'research'},
-  {id:'n7',  source:'FT',         sId:'mainstream',url:'https://www.ft.com/technology',                               title:'EU AI Act enforcement begins — high-risk AI systems face mandatory audits',        content:'The European Union began enforcing the AI Act. Companies using AI in hiring, credit scoring, or critical infrastructure must comply or face fines.',              timestamp:ago(58),  urg:'PRIORITY', cat:'policy'},
-  {id:'n8',  source:'Bloomberg',  sId:'mainstream',url:'https://www.bloomberg.com/technology',                        title:'Scale AI raises $1B Series F to expand RLHF data operations',                     content:"Scale AI secured $1 billion in new funding to scale its reinforcement learning from human feedback operations amid the model arms race.",                         timestamp:ago(71),  urg:'PRIORITY', cat:'funding'},
-  {id:'n9',  source:'GitHub Blog',sId:'github',    url:'https://github.blog/',                                        title:'GitHub Copilot X integrates Claude 3.7 for advanced code review',                 content:"GitHub announced Copilot X will use Anthropic's Claude 3.7 Sonnet for code review features, citing superior performance on large codebase tasks.",               timestamp:ago(84),  urg:'PRIORITY', cat:'products'},
-  {id:'n10', source:'Hacker News',sId:'hn',        url:'https://news.ycombinator.com/',                               title:'Ask HN: Quality jump in Claude 3.7 extended thinking?',                           content:'Top HN thread with 847 comments as developers share results. Consensus: meaningful improvement on complex, multi-step reasoning tasks.',                         timestamp:ago(96),  urg:'ROUTINE',  cat:'models'},
-  {id:'n11', source:'Wired',      sId:'mainstream',url:'https://www.wired.com/tag/artificial-intelligence/',          title:'Hugging Face surpasses 1 million models milestone',                               content:"Hugging Face crossed one million models on its platform. New models are being published at a rate of one per minute.",                                          timestamp:ago(112), urg:'ROUTINE',  cat:'opensource'},
-  {id:'n12', source:'NYT Tech',   sId:'mainstream',url:'https://www.nytimes.com/section/technology',                  title:"OpenAI's GPT-4o real-time voice API now open to all developers",                  content:'OpenAI opened its real-time voice API to all developers, enabling natural spoken conversations at roughly $0.06 per minute.',                                   timestamp:ago(128), urg:'ROUTINE',  cat:'products'},
-  {id:'n13', source:'arXiv',      sId:'arxiv',     url:'https://arxiv.org/list/cs.AI/recent',           title:'MMLU-Pro: A harder benchmark reveals frontier model gaps in expert reasoning',    content:'Researchers release MMLU-Pro. Leading models score 8-12 points lower than on original MMLU, suggesting benchmark saturation.',                                  timestamp:ago(144), urg:'ROUTINE',  cat:'research'},
-  {id:'n14', source:'Perplexity', sId:'mainstream',url:'https://www.perplexity.ai/',                     title:'Perplexity AI raises $250M Series C for AI-native search',                        content:'Perplexity AI announced $250M at a $3B valuation. The company handles 100M queries per day, up 10x from a year ago.',                                        timestamp:ago(163), urg:'ROUTINE',  cat:'funding'},
-  {id:'n15', source:'arXiv',      sId:'arxiv',     url:'https://arxiv.org/list/cs.AI/recent',           title:'Constitutional AI v2: Anthropic publishes updated alignment framework',           content:'Anthropic releases Constitutional AI version 2, detailing improvements to training helpful, harmless, and honest AI systems.',                                  timestamp:ago(181), urg:'ROUTINE',  cat:'research'},
-];
 
 // Capability baseline — benchmark scores accurate from each model's release.
 // `aliases` = lowercase strings matched against news/social text for momentum.
@@ -796,24 +755,14 @@ const LEADERBOARD = [
   {id:'l4',  name:'o3',                 lab:'OpenAI',    elo:1265, daysOld:105, ctx:'200k',  mmlu:'91.2', heval:'88.5', gpqa:'71.7', notes:'Reasoning specialist',aliases:['openai o3',' o3 ','o3 model','o3-mini','o3 mini']},
   {id:'l5',  name:'Grok 3',             lab:'xAI',       elo:1243, daysOld:22,  ctx:'131k',  mmlu:'87.5', heval:'87.1', gpqa:'84.6', notes:'GPQA record',         aliases:['grok 3','grok-3','grok3']},
   {id:'l6',  name:'Llama 4 Scout',      lab:'Meta',      elo:1218, daysOld:5,   ctx:'512k',  mmlu:'88.1', heval:'92.3', gpqa:'57.2', notes:'Open-source leader',  aliases:['llama 4','llama 4 scout','llama4']},
-  {id:'l7',  name:'DeepSeek R2',        lab:'DeepSeek',  elo:1201, daysOld:19,  ctx:'64k',   mmlu:'86.4', heval:'86.8', gpqa:'71.5', notes:'Math specialist',     aliases:['deepseek r2','deepseek-r2','deepseek r1','deepseek']},
+  {id:'l7',  name:'DeepSeek R2',        lab:'DeepSeek',  elo:1201, daysOld:19,  ctx:'64k',   mmlu:'86.4', heval:'86.8', gpqa:'71.5', notes:'Math specialist',     aliases:['deepseek r2','deepseek-r2','deepseek r1','deepseek v3']},
   {id:'l8',  name:'Mistral Large 2',    lab:'Mistral',   elo:1189, daysOld:161, ctx:'128k',  mmlu:'84.1', heval:'85.2', gpqa:'50.8', notes:'Code focus',          aliases:['mistral large','mistral large 2','mistral-large']},
   {id:'l9',  name:'Claude 3.5 Sonnet',  lab:'Anthropic', elo:1183, daysOld:198, ctx:'200k',  mmlu:'88.3', heval:'92.0', gpqa:'59.4', notes:'Agentic tasks',       aliases:['claude 3.5','claude 3.5 sonnet','claude3.5']},
   {id:'l10', name:'Gemini 2.0 Flash',   lab:'Google',    elo:1147, daysOld:112, ctx:'1024k', mmlu:'86.7', heval:'85.4', gpqa:'62.1', notes:'Fast · cheap',        aliases:['gemini 2.0','gemini 2.0 flash','gemini flash']},
-  {id:'l11', name:'Qwen 2.5-72B',       lab:'Alibaba',   elo:1134, daysOld:219, ctx:'128k',  mmlu:'83.6', heval:'84.7', gpqa:'49.0', notes:'Open-source #2',      aliases:['qwen 2.5','qwen2.5','qwen 2.5-72b','qwen']},
+  {id:'l11', name:'Qwen 2.5-72B',       lab:'Alibaba',   elo:1134, daysOld:219, ctx:'128k',  mmlu:'83.6', heval:'84.7', gpqa:'49.0', notes:'Open-source #2',      aliases:['qwen 2.5','qwen2.5','qwen 2.5-72b','qwen3']},
   {id:'l12', name:'GPT-4o mini',        lab:'OpenAI',    elo:1089, daysOld:273, ctx:'128k',  mmlu:'82.0', heval:'81.2', gpqa:'40.2', notes:'Affordable tier',     aliases:['gpt-4o mini','gpt4o mini','4o mini']},
 ];
 
-const TRENDING = [
-  {id:'tr1', topic:'Claude 4 release speculation',    score:94, rdCt:412, nwCt:201, reason:'Growing community speculation around next-gen Anthropic release timeline and capabilities'},
-  {id:'tr2', topic:'OpenAI o3 pricing controversy',   score:87, rdCt:389, nwCt:167, reason:'Developers debate steep API costs vs. real-world reasoning performance gains'},
-  {id:'tr3', topic:'Llama 4 Scout benchmark results', score:82, rdCt:498, nwCt:143, reason:'New open-source SOTA: 92.3% HumanEval, 512k context — beats closed models on code'},
-  {id:'tr4', topic:'AGI timeline debate',             score:78, rdCt:521, nwCt:89,  reason:'Multiple lab CEOs making bold 2–5 year AGI claims, sparking community pushback'},
-  {id:'tr5', topic:'EU AI Act compliance deadlines',  score:71, rdCt:213, nwCt:234, reason:'Enforcement now active — high-risk AI systems in hiring/credit face mandatory audits'},
-  {id:'tr6', topic:'Reasoning model arms race',       score:65, rdCt:287, nwCt:112, reason:'OpenAI o3, Claude 3.7 thinking, DeepSeek R2 all competing on chain-of-thought'},
-  {id:'tr7', topic:'Open source vs closed AI',        score:58, rdCt:341, nwCt:78,  reason:"Meta's Llama 4 reignites debate: can open weights match closed frontier models?"},
-  {id:'tr8', topic:'AI coding assistants comparison', score:52, rdCt:189, nwCt:134, reason:'Cursor vs Copilot vs Devin: community benchmarks reveal significant real-world gaps'},
-];
 
 // ── Live data fetching ────────────────────────────────────────
 // News: RSS via rss2json.com (free, no key needed for personal use)
@@ -855,45 +804,63 @@ function stripHtml(html) {
   return (html || '').replace(/<[^>]*>/g, '').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&#39;/g,"'").replace(/&quot;/g,'"').trim();
 }
 
+// Only http(s) URLs may reach an href/window.open — a compromised feed could
+// otherwise inject a javascript: URL that executes on click.
+function safeUrl(u) {
+  return (typeof u === 'string' && /^https?:\/\//i.test(u)) ? u : null;
+}
+
+// rss2json returns "YYYY-MM-DD HH:mm:ss" in UTC but without a timezone marker,
+// which new Date() would parse as LOCAL time — skewing every timestamp and the
+// urgency classification by the viewer's UTC offset. Force UTC.
+function parseFeedDate(s) {
+  if (!s) return new Date();
+  const d = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(s)
+    ? new Date(s.replace(' ', 'T') + 'Z')
+    : new Date(s);
+  return isNaN(d.getTime()) ? new Date() : d;
+}
+
 async function fetchRSSFeed(src) {
   const res  = await fetch(RSS2JSON + encodeURIComponent(src.url), {signal: AbortSignal.timeout(7000)});
   const data = await res.json();
   if (data.status !== 'ok' || !data.items) return [];
-  return data.items.map((item, i) => ({
-    id:        `live-${src.sId}-${i}-${Date.now()}`,
-    source:    src.source,
-    sId:       src.sId,
-    title:     stripHtml(item.title),
-    content:   stripHtml(item.description).slice(0, 240),
-    url:       item.link,
-    timestamp: new Date(item.pubDate || Date.now()).toISOString(),
-    urg:       assignUrgency(item.title, item.pubDate),
-    cat:       assignCategory(item.title + ' ' + (item.description || '')),
-  }));
+  return data.items.map((item, i) => {
+    const pub = parseFeedDate(item.pubDate);
+    return {
+      // Stable key (guid/link) — keeps React from remounting every card on refresh
+      id:        `rss-${item.guid || item.link || `${src.sId}-${i}`}`,
+      source:    src.source,
+      sId:       src.sId,
+      title:     stripHtml(item.title),
+      content:   stripHtml(item.description).slice(0, 240),
+      url:       safeUrl(item.link),
+      timestamp: pub.toISOString(),
+      urg:       assignUrgency(item.title, pub),
+      cat:       assignCategory(item.title + ' ' + (item.description || '')),
+    };
+  });
 }
 
+// HN via Algolia's official search API: the current front page in ONE request
+// (the Firebase API needed 41 requests per cycle to do the same job).
 async function fetchHN() {
-  const ids  = await fetch('https://hacker-news.firebaseio.com/v0/topstories.json',
-    {signal: AbortSignal.timeout(5000)}).then(r => r.json());
-  const items = await Promise.all(
-    ids.slice(0, 40).map(id =>
-      fetch(`https://hacker-news.firebaseio.com/v0/item/${id}.json`,
-        {signal: AbortSignal.timeout(4000)}).then(r => r.json()).catch(()=>null)
-    )
-  );
-  return items
-    .filter(it => it && it.title && /\bai\b|llm|gpt|claude|gemini|llama|openai|anthropic|deep.?seek|mistral|neural|language model/i.test(it.title))
+  const res  = await fetch('https://hn.algolia.com/api/v1/search?tags=front_page&hitsPerPage=30',
+    {signal: AbortSignal.timeout(7000)});
+  const data = await res.json();
+  return (data.hits || [])
+    .filter(h => h && h.title && /\bai\b|llm|gpt|claude|gemini|llama|openai|anthropic|deep.?seek|mistral|neural|language model/i.test(h.title))
     .slice(0, 4)
-    .map((it, i) => ({
-      id:        `hn-${i}-${Date.now()}`,
+    .map(h => ({
+      id:        `hn-${h.objectID}`,
       source:    'Hacker News',
       sId:       'hn',
-      title:     it.title,
-      content:   `${it.score} points · ${it.descendants || 0} comments`,
-      url:       it.url || `https://news.ycombinator.com/item?id=${it.id}`,
-      timestamp: new Date(it.time * 1000).toISOString(),
-      urg:       assignUrgency(it.title, new Date(it.time * 1000)),
-      cat:       assignCategory(it.title),
+      title:     h.title,
+      content:   `${h.points || 0} points · ${h.num_comments || 0} comments`,
+      url:       safeUrl(h.url) || `https://news.ycombinator.com/item?id=${h.objectID}`,
+      timestamp: new Date(h.created_at).toISOString(),
+      urg:       assignUrgency(h.title, h.created_at),
+      cat:       assignCategory(h.title),
     }));
 }
 
@@ -938,8 +905,8 @@ async function fetchSubreddit({sub, label, cat}) {
     .map(c => c.data)
     .filter(p => p && p.title && !p.stickied && p.score > 10)
     .slice(0, 4)
-    .map((p, i) => ({
-      id:        `reddit-${sub}-${i}-${p.id}`,
+    .map(p => ({
+      id:        `reddit-${p.id}`,
       platform:  'reddit',
       sId:       'reddit',
       sub:       label,
@@ -948,7 +915,7 @@ async function fetchSubreddit({sub, label, cat}) {
         ? p.selftext.replace(/\n+/g,' ').trim().slice(0, 220) + (p.selftext.length > 220 ? '…' : '')
         : p.title,
       title:     p.title,
-      url:       p.url,
+      url:       safeUrl(p.url),
       permalink: `https://reddit.com${p.permalink}`,
       timestamp: new Date(p.created_utc * 1000).toISOString(),
       urg:       redditUrgency(p.score, p.created_utc),
@@ -1047,7 +1014,9 @@ function computeCapability(model) {
 // Count how strongly the live feeds are talking about this model.
 function computeMomentum(model, newsItems, socialItems, hfTrending) {
   const aliases = (model.aliases || [model.name.toLowerCase()]).map(a => a.toLowerCase());
-  const hit = txt => { const t = (txt || '').toLowerCase(); return aliases.some(a => t.includes(a)); };
+  // Pad with spaces so boundary-sensitive aliases like ' o3 ' match at the
+  // start/end of a title, not just mid-string.
+  const hit = txt => { const t = ' ' + (txt || '').toLowerCase() + ' '; return aliases.some(a => t.includes(a)); };
 
   // News: each mention weighted by urgency × recency decay (half-life ~24h)
   let newsScore = 0, newsHits = 0;
@@ -1154,17 +1123,10 @@ function applyF(items, f, sourceKey) {
 
 // ── Components ────────────────────────────────────────────────
 
-// Social Post — handles Reddit + legacy LI/X demo posts
+// Social Post — live Reddit posts; the whole card links to the thread
 function SocialPost({post, kws}) {
-  const isReddit = post.platform === 'reddit';
-  const isLI     = post.platform === 'linkedin';
-  const urgCls   = post.urg==='FLASH'?' fl':post.urg==='PRIORITY'?' pr':'';
-  // Reddit live posts: permalink = thread URL; demo posts: url = profile URL
-  const link     = post.permalink || post.url || null;
-
-  const badge = isReddit
-    ? <span className="sp-plat rd">{post.sub}</span>
-    : <span className={`sp-plat ${isLI?'li':'x'}`}>{isLI?'LI':'X'}</span>;
+  const urgCls = post.urg==='FLASH'?' fl':post.urg==='PRIORITY'?' pr':'';
+  const link   = post.permalink || post.url || null;
 
   return (
     <a className={`sp${urgCls}`}
@@ -1173,12 +1135,12 @@ function SocialPost({post, kws}) {
       rel="noopener noreferrer"
       style={{display:'block', textDecoration:'none', color:'inherit'}}>
       <div className="sp-top">
-        {badge}
+        <span className="sp-plat rd">{post.sub}</span>
         <span className="sp-handle">{post.handle}</span>
         <span className="sp-time">{timeAgo(post.timestamp)}</span>
         {link && <span style={{fontSize:11,color:'var(--td)',marginLeft:4}}>↗</span>}
       </div>
-      {isReddit && post.title !== post.content &&
+      {post.title !== post.content &&
         <div className="sp-title"><Hl text={post.title} kws={kws}/></div>
       }
       <div className="sp-body"><Hl text={post.content} kws={kws}/></div>
@@ -1243,25 +1205,6 @@ function CompactNewsItem({item, kws}) {
       <span className="ni-src" style={{color:SRC_C[item.source]||'var(--ts)'}}>{item.source}</span>
       <span className="ni-title"><Hl text={item.title} kws={kws}/></span>
       <span className="ni-time">{timeAgo(item.timestamp)}</span>
-    </div>
-  );
-}
-
-// Legacy NewsItem kept for any other use
-function NewsItem({item, kws}) {
-  const mk  = matchedKws(item, kws);
-  const uc  = item.urg==='FLASH'?'fl':item.urg==='PRIORITY'?'pr':'rt';
-  return (
-    <div className={`ni${item.urg==='FLASH'?' fl':item.urg==='PRIORITY'?' pr':''}${mk.length?' kw':''}`}>
-      <div className="ni-top">
-        <span className={`ni-urg ${uc}`}>{URG_SYM[item.urg]}</span>
-        <span className="ni-src" style={{color:SRC_C[item.source]||'var(--tl)'}}>{item.source}</span>
-        <span className="ni-cat">· {item.cat}</span>
-        {mk.length>0&&<span style={{fontSize:8,color:'var(--pri)',marginLeft:4}}>⚑</span>}
-        <span className="ni-time">{timeAgo(item.timestamp)}</span>
-      </div>
-      <div className="ni-title"><Hl text={item.title} kws={kws}/></div>
-      <div className="ni-body"><Hl text={item.content} kws={kws}/></div>
     </div>
   );
 }
@@ -1335,25 +1278,25 @@ const PANEL_INFO = {
   left: {
     title: 'Social Signal — how this works',
     description: 'Live posts from high-signal AI communities on Reddit, fetched via the free public API (no account needed). Posts are ranked by upvote score and recency. Click any card to open the original post. Urgency is auto-assigned: ⚡ FLASH for 2,000+ upvotes within 12 hours, ▲ PRIORITY for 400+ upvotes or posted within 20 hours, · ROUTINE for everything else.',
-    update: 'Refreshes every 3 min',
+    update: 'Refreshes every 5 min',
     sources: ['r/MachineLearning','r/LocalLLaMA','r/artificial','r/singularity','r/OpenAI'],
   },
   center: {
     title: 'AI Wire — how this works',
-    description: 'Headlines fetched live from major AI publications via RSS, plus top Hacker News stories filtered for AI topics. Stories are auto-classified by topic (models, research, funding, policy, open source, products) and urgency: ⚡ FLASH = breaking news under 3h, ▲ PRIORITY = under 18h, · ROUTINE = older. The hero card always shows the highest-urgency story.',
-    update: 'Refreshes every 10 min',
-    sources: ['TechCrunch AI','The Verge AI','VentureBeat','Wired AI','arXiv cs.AI','Hacker News'],
+    description: 'Headlines fetched live from major AI publications via RSS, plus the Hacker News front page filtered for AI topics. Stories are auto-classified by topic (models, research, funding, policy, open source, products) and urgency: ⚡ FLASH = breaking news under 3h, ▲ PRIORITY = under 18h, · ROUTINE = older. The hero card always shows the highest-urgency story.',
+    update: 'Refreshes every 5 min',
+    sources: ['TechCrunch AI','The Verge AI','VentureBeat','Wired AI','Ars Technica','MIT Tech Review','arXiv','Hacker News'],
   },
   trending: {
     title: 'Trending Topics — how this works',
     description: 'Topics are ranked by cross-platform discussion volume — a weighted score combining Reddit post activity, news article frequency, and community engagement. A score of 100 means peak buzz for the current period. Counts show how many posts/articles mentioned the topic on each platform.',
-    update: 'Curated weekly',
-    sources: ['Reddit posts', 'News articles', 'Community engagement'],
+    update: 'Recomputed every 5 min from live feeds',
+    sources: ['Live Reddit posts', 'Live news articles'],
   },
   right: {
     title: 'Model Watch — how this works',
-    description: 'Models are ranked by the CORTEX Score: 50% capability + 50% live public momentum. Capability is a composite of public benchmarks (GPQA reasoning, MMLU knowledge, HumanEval coding) — it changes when a model is released. Momentum is computed live from how much the news wire, Reddit communities, and HuggingFace trending are talking about each model — weighted by urgency, upvotes, and recency. The orange bar = capability, green bar = momentum. Rankings re-sort every 3 min as fresh data arrives. Click any row for the live lmarena.ai leaderboard; the ⊞ button opens the full breakdown table.',
-    update: 'Momentum re-ranks every 3 min',
+    description: 'Models are ranked by the CORTEX Score: 50% capability + 50% live public momentum. Capability is a composite of published benchmarks (GPQA reasoning, MMLU knowledge, HumanEval coding) — curated reference data that changes when a model is released. Momentum is computed live from how much the news wire, Reddit communities, and HuggingFace trending are talking about each model — weighted by urgency, upvotes, and recency. The orange bar = capability, green bar = momentum. Rankings re-sort every 5 min as fresh data arrives. Click any row for the live lmarena.ai leaderboard; the ⊞ button opens the full breakdown table.',
+    update: 'Momentum re-ranks every 5 min',
     sources: ['Public benchmarks','Live news wire','Reddit volume','HuggingFace trending'],
   },
 };
@@ -1418,7 +1361,7 @@ function InfoButton({info}) {
 }
 
 function ModelsOverlay({rankings, onClose}) {
-  const rows = rankings && rankings.length ? rankings : LEADERBOARD.map((m,i)=>({...m,rank:i+1,dir:'flat',cortexScore:'—',capScore:'—',momScore:'—'}));
+  const rows = rankings;
   return (
     <div className="models-overlay">
       <div className="moh">
@@ -1462,7 +1405,7 @@ function ModelsOverlay({rankings, onClose}) {
           <span><b style={{color:'#30d158'}}>Momentum</b> — live news + Reddit + HF trending</span>
           <span>Signals — n=news hits · s=social hits · HF=HuggingFace trending rank</span>
           <span>Arena ELO — lmarena.ai reference (static)</span>
-          <span style={{color:'var(--td)'}}>Momentum recomputes every 3 min from live feeds</span>
+          <span style={{color:'var(--td)'}}>Momentum recomputes every 5 min from live feeds · benchmark figures are curated reference data</span>
         </div>
       </div>
     </div>
@@ -1501,35 +1444,39 @@ function WatchlistModal({wl, onAdd, onRemove, onClose}) {
 // ── App ───────────────────────────────────────────────────────
 const DEFAULT_WL = ['GPT-5','Claude 4','Gemini 3','AGI','reasoning model','o4'];
 
-// Extended source colors for live feeds
-Object.assign(SRC_C, {
-  VentureBeat:'#7b5ea7', 'MIT Tech Review':'#a00000',
-  'Hacker News':'#dd6600', arXiv:'#b52020',
-});
-
 function App() {
   const [clock,      setClock]      = useState('');
   const [focused,    setFocused]    = useState('center');
   const [showWl,     setShowWl]     = useState(false);
   const [showModels, setShowModels] = useState(false);
-  // 'loading' → fetching  |  'live' → real data loaded  |  'demo' → fallback
-  const [dataStatus,   setDataStatus]   = useState('loading');
-  const [newsData,     setNewsData]     = useState(NEWS);
-  const [socialData,   setSocialData]   = useState(SOCIAL); // starts as curated demo
+  // Per-panel status: 'loading' → first fetch in flight | 'live' → real data
+  // shown | 'error' → fetch failed with nothing to show. No demo fallback —
+  // every item on screen comes from a live API.
+  const [newsStatus,   setNewsStatus]   = useState('loading');
+  const [socialStatus, setSocialStatus] = useState('loading');
+  const [newsData,     setNewsData]     = useState([]);
+  const [socialData,   setSocialData]   = useState([]);
   const [refreshKey,   setRefreshKey]   = useState(0);
   const [refreshing,   setRefreshing]   = useState(false);
   const [lastFetched,  setLastFetched]  = useState(null);
-  const [trendingData, setTrendingData] = useState(TRENDING);
+  const [trendingData, setTrendingData] = useState(null); // null until computed from live data
   const [hfModels,     setHfModels]     = useState([]);
-  const [rankings,     setRankings]     = useState(()=>computeRankings(LEADERBOARD, NEWS, SOCIAL, [], null));
+  // Initial ranking is capability-only (benchmarks); momentum joins once live data lands
+  const [rankings,     setRankings]     = useState(()=>computeRankings(LEADERBOARD, [], [], [], null));
   const prevScores = useRef(null);
+  const hasNews    = useRef(false);
+  const hasSocial  = useRef(false);
   const [wl, setWl] = useState(()=>{
     try{const s=localStorage.getItem('cx2_wl');return s?JSON.parse(s):DEFAULT_WL;}catch{return DEFAULT_WL;}
   });
   const [f, setF] = useState({sources:[],categories:[],urgency:[],q:''});
 
-  // Recompute live CORTEX rankings whenever news, social, or HF data changes
+  // Recompute trending + CORTEX rankings whenever news, social, or HF data changes
   useEffect(()=>{
+    if (newsData.length || socialData.length) {
+      const t = computeTrending(newsData, socialData);
+      if (t) setTrendingData(t);
+    }
     const next = computeRankings(LEADERBOARD, newsData, socialData, hfModels, prevScores.current);
     prevScores.current = Object.fromEntries(next.map(m => [m.name, m.cortexScore]));
     setRankings(next);
@@ -1540,12 +1487,12 @@ function App() {
     tick();const id=setInterval(tick,1000);return()=>clearInterval(id);
   },[]);
 
-  // Fetch live news + Reddit — runs on mount and whenever refreshKey changes
+  // Fetch live news + Reddit — runs on mount and whenever refreshKey changes.
+  // 5-min cadence keeps request volume polite for the keyless free APIs
+  // (rss2json, Reddit public JSON) this app depends on.
   useEffect(()=>{
     let cancelled = false;
-    // On first load: show loading skeleton; on manual refresh: keep old data visible
-    if (refreshKey === 0) setDataStatus('loading');
-    else setRefreshing(true);
+    if (refreshKey > 0) setRefreshing(true); // manual refresh keeps old data visible
 
     const load = async () => {
       const [newsResult, redditResult] = await Promise.allSettled([
@@ -1554,8 +1501,6 @@ function App() {
       ]);
       if (cancelled) return;
 
-      let anyLive = false;
-
       const liveNews   = newsResult.status==='fulfilled'   && newsResult.value.length   >= 3 ? newsResult.value   : null;
       const liveSocial = redditResult.status==='fulfilled' && redditResult.value.length >= 3 ? redditResult.value : null;
 
@@ -1563,26 +1508,32 @@ function App() {
         const items = [...liveNews];
         items.sort((a,b)=>(URG_O[a.urg]??2)-(URG_O[b.urg]??2)||(new Date(b.timestamp)-new Date(a.timestamp)));
         setNewsData(items);
-        anyLive = true;
+        hasNews.current = true;
+        setNewsStatus('live');
+      } else if (!hasNews.current) {
+        setNewsStatus('error');   // nothing cached — show honest failure state
       }
-      if (liveSocial) { setSocialData(liveSocial); anyLive = true; }
 
-      const trending = computeTrending(liveNews || [], liveSocial || []);
-      if (trending) setTrendingData(trending);
+      if (liveSocial) {
+        setSocialData(liveSocial);
+        hasSocial.current = true;
+        setSocialStatus('live');
+      } else if (!hasSocial.current) {
+        setSocialStatus('error');
+      }
 
-      setDataStatus(anyLive ? 'live' : 'demo');
       setRefreshing(false);
-      if (anyLive) setLastFetched(new Date());
+      if (liveNews || liveSocial) setLastFetched(new Date());
     };
     load();
-    const interval = setInterval(load, 3 * 60 * 1000);
+    const interval = setInterval(load, 5 * 60 * 1000);
     return () => { cancelled = true; clearInterval(interval); };
   },[refreshKey]);
 
   useEffect(()=>{
     const onVisible = () => {
       if (document.visibilityState !== 'visible') return;
-      const stale = !lastFetched || (Date.now() - lastFetched.getTime() > 3 * 60 * 1000);
+      const stale = !lastFetched || (Date.now() - lastFetched.getTime() > 5 * 60 * 1000);
       if (stale) setRefreshKey(k => k + 1);
     };
     document.addEventListener('visibilitychange', onVisible);
@@ -1622,14 +1573,16 @@ function App() {
   const tog   = (key,val)=>setF(x=>({...x,[key]:x[key].includes(val)?x[key].filter(y=>y!==val):[...x[key],val]}));
 
   const fSocial  = useMemo(()=>applyF(socialData,f,'sId'),[f, socialData]);
-  // Use live newsData (starts as demo NEWS, swaps to live once fetched)
   const fNews    = useMemo(()=>[...applyF(newsData,f,'sId')].sort((a,b)=>(URG_O[a.urg]??2)-(URG_O[b.urg]??2)||(new Date(b.timestamp)-new Date(a.timestamp))),[f, newsData]);
   // Featured = top 3 items (sort already puts FLASH then PRIORITY first)
   const featNews    = fNews.slice(0, 3);
   const compactNews = fNews.slice(3);
   const flashCt  = fNews.filter(n=>n.urg==='FLASH').length + fSocial.filter(s=>s.urg==='FLASH').length;
   const active   = f.sources.length||f.categories.length||f.urgency.length||f.q;
-  const maxTrend = Math.max(...trendingData.map(t=>t.score));
+  const maxTrend = trendingData?.length ? Math.max(...trendingData.map(t=>t.score)) : 1;
+  // Overall connection status derived from the per-panel states
+  const overall  = (newsStatus==='live'||socialStatus==='live') ? 'live'
+                 : (newsStatus==='loading'||socialStatus==='loading') ? 'loading' : 'offline';
 
   const PanelDot = ()=><div className="ph-dot"/>;
 
@@ -1643,14 +1596,13 @@ function App() {
           <span className="hdr-badge">AI INTELLIGENCE</span>
           <div className="demo-pill">
             <div className="demo-dot" style={{
-              background: dataStatus==='live' ? 'var(--pri)' : dataStatus==='loading' ? 'var(--ts)' : 'var(--cM)',
+              background: overall==='live' ? 'var(--pri)' : overall==='loading' ? 'var(--ts)' : '#ff453a',
             }}/>
-            <span>{dataStatus==='live' ? 'live' : dataStatus==='loading' ? 'connecting…' : 'demo'}</span>
-            {dataStatus==='live'
-              ? <span style={{color:'var(--td)',fontSize:11}}>· live · links go to articles</span>
-              : dataStatus==='demo'
-              ? <span style={{color:'var(--td)',fontSize:11}}>· demo · links go to publication homepages</span>
-              : null}
+            <span>{overall==='live' ? 'live' : overall==='loading' ? 'connecting…' : 'offline'}</span>
+            {overall==='live' && lastFetched &&
+              <span style={{color:'var(--td)',fontSize:11}}>· updated {timeAgo(lastFetched.toISOString())} ago</span>}
+            {overall==='offline' &&
+              <span style={{color:'var(--td)',fontSize:11}}>· feeds unreachable — retrying every 5 min</span>}
           </div>
         </div>
         <div className="hdr-right">
@@ -1702,7 +1654,21 @@ function App() {
             </div>
           </div>
           <div id="pc-left" className="pc">
-            {fSocial.length===0
+            {socialStatus==='loading' ? (
+              [1,2,3,4].map(i=>(
+                <div key={i} style={{margin:'8px 12px',padding:'14px 16px',background:'var(--bg2)',borderRadius:'var(--r)',opacity:1-i*0.15}}>
+                  <div className="skel" style={{height:8,width:110,marginBottom:10}}/>
+                  <div className="skel" style={{height:13,width:'90%',marginBottom:8}}/>
+                  <div className="skel" style={{height:10,width:'55%'}}/>
+                </div>
+              ))
+            ) : socialStatus==='error' ? (
+              <div style={{padding:'32px 24px',textAlign:'center',fontSize:13,color:'var(--ts)',lineHeight:1.6}}>
+                Live social feed unreachable.<br/>
+                <span style={{color:'var(--td)',fontSize:12}}>Reddit's public API may be rate-limiting this connection. Retrying every 5 min.</span><br/>
+                <button className="btn" style={{marginTop:12}} onClick={()=>setRefreshKey(k=>k+1)}>Retry now</button>
+              </div>
+            ) : fSocial.length===0
               ? <div style={{padding:'24px',textAlign:'center',fontSize:13,color:'var(--ts)'}}>No results</div>
               : fSocial.map(p=><SocialPost key={p.id} post={p} kws={wl}/>)}
           </div>
@@ -1719,14 +1685,14 @@ function App() {
               <button
                 className="refresh-btn"
                 onClick={e=>{e.stopPropagation();setRefreshKey(k=>k+1);}}
-                disabled={refreshing || dataStatus==='loading'}
+                disabled={refreshing || newsStatus==='loading'}
                 title={lastFetched ? `Last updated ${timeAgo(lastFetched.toISOString())} ago — click to refresh` : 'Refresh stories'}
               ><span className={refreshing?'spin':''}> ↺</span></button>
               <InfoButton info={PANEL_INFO.center}/>
             </div>
           </div>
           <div id="pc-center" className="pc">
-            {dataStatus==='loading' ? (
+            {newsStatus==='loading' ? (
               // Loading skeleton — 3 ghost cards using Apple card layout + shimmer
               [1,2,3].map(i=>(
                 <div key={i} style={{
@@ -1741,6 +1707,12 @@ function App() {
                   <div className="skel" style={{height:10, width:'60%'}}/>
                 </div>
               ))
+            ) : newsStatus==='error' ? (
+              <div style={{padding:'32px 24px',textAlign:'center',fontSize:13,color:'var(--ts)',lineHeight:1.6}}>
+                News feeds unreachable.<br/>
+                <span style={{color:'var(--td)',fontSize:12}}>RSS sources may be rate-limiting this connection. Retrying every 5 min.</span><br/>
+                <button className="btn" style={{marginTop:12}} onClick={()=>setRefreshKey(k=>k+1)}>Retry now</button>
+              </div>
             ) : fNews.length===0 ? (
               <div style={{padding:'24px',textAlign:'center',fontSize:13,color:'var(--ts)'}}>No results</div>
             ) : (<>
@@ -1748,13 +1720,15 @@ function App() {
               {featNews[0] && <LeadNewsItem item={featNews[0]} kws={wl}/>}
               {/* Tier 2 — supporting featured */}
               {featNews.slice(1).map(n=><FeatNewsItem key={n.id} item={n} kws={wl}/>)}
-              {/* Trending Topics */}
-              <div className="wire-divider has-info">
-                Trending Topics
-                <span className="wire-sep"/>
-                <InfoButton info={PANEL_INFO.trending}/>
-              </div>
-              {trendingData.map((t,i)=><TrendItem key={t.id} t={t} idx={i} maxScore={maxTrend}/>)}
+              {/* Trending Topics — computed live; hidden until first computation */}
+              {trendingData?.length > 0 && (<>
+                <div className="wire-divider has-info">
+                  Trending Topics
+                  <span className="wire-sep"/>
+                  <InfoButton info={PANEL_INFO.trending}/>
+                </div>
+                {trendingData.map((t,i)=><TrendItem key={t.id} t={t} idx={i} maxScore={maxTrend}/>)}
+              </>)}
             </>)}
           </div>
         </div>

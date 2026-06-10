@@ -3,9 +3,13 @@
   "version": "1.0.0",
   "description": "CORTEX AI Intelligence Dashboard",
   "scripts": {
-    "start": "serve . --listen $PORT"
+    "start": "serve . --listen $PORT",
+    "check": "node scripts/check-syntax.mjs"
   },
   "dependencies": {
     "serve": "^14.2.3"
+  },
+  "devDependencies": {
+    "@babel/parser": "^7.26.0"
   }
 }
