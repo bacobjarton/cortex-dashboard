@@ -33,8 +33,11 @@ Three-panel layout (left / center / right):
   Algolia (1 request); three-tier hierarchy + Trending Topics with computed
   "why it's trending" reasons
 - **Model Watch** — CORTEX Score ranking = 50% capability (curated GPQA/MMLU/
-  HumanEval composite in `LEADERBOARD`) + 50% live momentum (news mentions ×
-  urgency × 24h half-life decay, log-scaled Reddit upvotes, HF trending bonus)
+  HumanEval/context composite in `LEADERBOARD`) + 50% live momentum (news
+  mentions × urgency × 24h half-life decay, log-scaled Reddit upvotes, HF
+  trending bonus). Use-case tabs (Overall/Coding/Reasoning/Work/Long Docs)
+  re-weight the capability blend via `USE_CASES`; ★ badges mark the
+  benchmark champion per use case (`CHAMPIONS`, capability-only)
 
 Mobile: single-panel view with bottom tab bar (< 1024px breakpoint)
 

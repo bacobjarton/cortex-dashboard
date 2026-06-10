@@ -11,7 +11,7 @@ A real-time dashboard for monitoring the AI industry: live community signal, new
 | **Social Signal** | Hot posts from 5 AI subreddits, ranked by upvotes + recency; every card links to the thread | Reddit public JSON API |
 | **AI Wire** | Live headlines, three-tier hierarchy (lead → featured → compact), auto-classified by topic and urgency | 8 RSS feeds via rss2json + Hacker News front page (Algolia API) |
 | **Trending Topics** | Cross-platform discussion volume with a "why it's trending" line pulled from the top matching headline | Computed from live news + Reddit data |
-| **Model Watch** | CORTEX Score ranking: 50% capability (GPQA/MMLU/HumanEval composite, curated) + 50% momentum (live news/Reddit/HuggingFace buzz with urgency weighting and 24h half-life decay) | Computed + HuggingFace API |
+| **Model Watch** | CORTEX Score ranking: 50% capability (GPQA/MMLU/HumanEval/context composite, curated) + 50% momentum (live news/Reddit/HuggingFace buzz with urgency weighting and 24h half-life decay). Use-case tabs — Overall, Coding, Reasoning, Work, Long Docs — re-weight the capability blend; ★ marks each use case's benchmark champion | Computed + HuggingFace API |
 
 All data is live — there is no demo/fallback content. If a feed is unreachable the panel says so and retries every 5 minutes.
 

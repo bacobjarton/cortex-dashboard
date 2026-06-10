@@ -413,6 +413,14 @@ body {
   color:#000000; background:var(--pri);
   padding:1px 6px; border-radius:var(--r-xs); flex-shrink:0;
 }
+/* ★ capability champion per use case */
+.mr-best {
+  font-family:var(--sans); font-size:9px; font-weight:700;
+  color:var(--cB); background:var(--cF);
+  padding:1px 5px; border-radius:var(--r-xs); flex-shrink:0;
+  margin-left:4px; letter-spacing:.03em; text-transform:uppercase;
+  white-space:nowrap;
+}
 /* CORTEX score sub-label + capability/momentum split bar */
 .mr-sub {
   font-family:var(--mono); font-size:9px; color:var(--td);
@@ -1002,14 +1010,46 @@ function computeTrending(newsItems, socialItems) {
 // Capability is stable (changes on model release); momentum recomputes
 // every refresh from live news + Reddit + HuggingFace trending data.
 
-// Normalize a raw benchmark composite to 0–100 across the model set.
-function computeCapability(model) {
-  // Weighted blend of public benchmarks. GPQA (hard reasoning) weighted highest.
+// Use-case views re-weight the capability blend. Benchmarks map to use cases:
+// HumanEval → coding · GPQA → hard reasoning · MMLU → broad knowledge work ·
+// context window → long-document workloads.
+const USE_CASES = {
+  overall:   { label:'Overall',   desc:'balanced blend',                w:{gpqa:.45, mmlu:.30, heval:.25} },
+  coding:    { label:'Coding',    desc:'code generation & review',      w:{heval:.70, gpqa:.20, mmlu:.10} },
+  reasoning: { label:'Reasoning', desc:'hard multi-step problems',      w:{gpqa:.75, mmlu:.15, heval:.10} },
+  work:      { label:'Work',      desc:'knowledge work: writing, analysis, Q&A', w:{mmlu:.70, gpqa:.15, heval:.15} },
+  longdocs:  { label:'Long Docs', desc:'whole codebases & big documents', w:{ctx:.55, mmlu:.25, gpqa:.20} },
+};
+
+// Weighted benchmark composite for one model under one use case (0–100-ish).
+function computeCapability(model, uc = USE_CASES.overall) {
   const mmlu  = parseFloat(model.mmlu)  || 0;   // 0–100
   const heval = parseFloat(model.heval) || 0;   // 0–100
   const gpqa  = parseFloat(model.gpqa)  || 0;   // 0–100
-  return (gpqa * 0.45) + (mmlu * 0.30) + (heval * 0.25);
+  // Context window, log-scaled to 0–100 (4k → 0, 2M → 100) so 2M isn't
+  // treated as linearly 16× better than 128k.
+  const ctxK  = parseFloat(model.ctx) || 4;
+  const ctxScore = Math.max(0, Math.min(100,
+    (Math.log2(ctxK / 4) / Math.log2(2048 / 4)) * 100));
+  const w = uc.w;
+  return gpqa*(w.gpqa||0) + mmlu*(w.mmlu||0) + heval*(w.heval||0) + ctxScore*(w.ctx||0);
 }
+
+// Capability champion per use case — by benchmarks alone, since public buzz
+// shouldn't decide what's "best for coding". Shown as ★ badges on the rows.
+const CHAMPIONS = (() => {
+  const map = {};
+  for (const [k, uc] of Object.entries(USE_CASES)) {
+    if (k === 'overall') continue;
+    let best = null, bestV = -Infinity;
+    for (const m of LEADERBOARD) {
+      const v = computeCapability(m, uc);
+      if (v > bestV) { bestV = v; best = m.name; }
+    }
+    (map[best] = map[best] || []).push(uc.label);
+  }
+  return map;
+})();
 
 // Count how strongly the live feeds are talking about this model.
 function computeMomentum(model, newsItems, socialItems, hfTrending) {
@@ -1048,9 +1088,10 @@ function computeMomentum(model, newsItems, socialItems, hfTrending) {
 }
 
 // Build the live ranking. `prev` = map of name→score from last run for ▲/▼.
-function computeRankings(models, newsItems, socialItems, hfTrending, prev) {
+// `uc` = use-case view: re-weights the capability half of the score.
+function computeRankings(models, newsItems, socialItems, hfTrending, prev, uc = USE_CASES.overall) {
   const enriched = models.map(m => {
-    const cap = computeCapability(m);
+    const cap = computeCapability(m, uc);
     const mom = computeMomentum(m, newsItems, socialItems, hfTrending);
     return { ...m, _cap: cap, _momRaw: mom.raw, _mom: mom };
   });
@@ -1222,6 +1263,7 @@ function ModelRankItem({m}) {
         <div className="mr-name">
           {m.name}
           {m.daysOld<=30&&<span className="mr-new">NEW</span>}
+          {(CHAMPIONS[m.name]||[]).map(l=><span key={l} className="mr-best">★ {l}</span>)}
         </div>
         <div className="mr-lab">{m.lab}</div>
         {/* capability (orange) + momentum (green) split bar */}
@@ -1295,7 +1337,7 @@ const PANEL_INFO = {
   },
   right: {
     title: 'Model Watch — how this works',
-    description: 'Models are ranked by the CORTEX Score: 50% capability + 50% live public momentum. Capability is a composite of published benchmarks (GPQA reasoning, MMLU knowledge, HumanEval coding) — curated reference data that changes when a model is released. Momentum is computed live from how much the news wire, Reddit communities, and HuggingFace trending are talking about each model — weighted by urgency, upvotes, and recency. The orange bar = capability, green bar = momentum. Rankings re-sort every 5 min as fresh data arrives. Click any row for the live lmarena.ai leaderboard; the ⊞ button opens the full breakdown table.',
+    description: 'Models are ranked by the CORTEX Score: 50% capability + 50% live public momentum. Capability is a composite of published benchmarks (GPQA reasoning, MMLU knowledge, HumanEval coding, context window) — curated reference data that changes when a model is released. The use-case tabs re-weight that blend: Coding emphasizes HumanEval, Reasoning emphasizes GPQA, Work emphasizes MMLU, Long Docs emphasizes context window. ★ badges mark the benchmark champion for each use case. Momentum is computed live from news, Reddit, and HuggingFace trending — weighted by urgency, upvotes, and recency. Orange bar = capability, green bar = momentum. Rankings re-sort every 5 min; the ⊞ button opens the full breakdown table.',
     update: 'Momentum re-ranks every 5 min',
     sources: ['Public benchmarks','Live news wire','Reddit volume','HuggingFace trending'],
   },
@@ -1360,12 +1402,15 @@ function InfoButton({info}) {
   );
 }
 
-function ModelsOverlay({rankings, onClose}) {
+function ModelsOverlay({rankings, useCase, onClose}) {
   const rows = rankings;
+  const uc   = USE_CASES[useCase] || USE_CASES.overall;
+  const wNames = {gpqa:'GPQA', mmlu:'MMLU', heval:'HumanEval', ctx:'Context'};
+  const wTxt = Object.entries(uc.w).map(([k,v])=>`${wNames[k]||k} ${Math.round(v*100)}%`).join(' · ');
   return (
     <div className="models-overlay">
       <div className="moh">
-        <span className="moh-title">CORTEX Rankings — capability + live momentum</span>
+        <span className="moh-title">CORTEX Rankings · {uc.label} — capability + live momentum</span>
         <button className="btn" onClick={onClose} style={{color:'var(--td)'}}>close [esc]</button>
       </div>
       <div className="mo-wrap">
@@ -1401,7 +1446,7 @@ function ModelsOverlay({rankings, onClose}) {
         </table>
         <div className="mt-legend">
           <span><b style={{color:'var(--cB)'}}>CORTEX</b> — 50% capability + 50% live momentum</span>
-          <span><b style={{color:'var(--cM)'}}>Capability</b> — GPQA·MMLU·HumanEval composite</span>
+          <span><b style={{color:'var(--cM)'}}>Capability ({uc.label})</b> — {wTxt}</span>
           <span><b style={{color:'#30d158'}}>Momentum</b> — live news + Reddit + HF trending</span>
           <span>Signals — n=news hits · s=social hits · HF=HuggingFace trending rank</span>
           <span>Arena ELO — lmarena.ai reference (static)</span>
@@ -1462,8 +1507,9 @@ function App() {
   const [trendingData, setTrendingData] = useState(null); // null until computed from live data
   const [hfModels,     setHfModels]     = useState([]);
   // Initial ranking is capability-only (benchmarks); momentum joins once live data lands
+  const [useCase,      setUseCase]      = useState('overall');
   const [rankings,     setRankings]     = useState(()=>computeRankings(LEADERBOARD, [], [], [], null));
-  const prevScores = useRef(null);
+  const prevScores = useRef({});  // ▲/▼ history kept per use-case view
   const hasNews    = useRef(false);
   const hasSocial  = useRef(false);
   const [wl, setWl] = useState(()=>{
@@ -1471,16 +1517,26 @@ function App() {
   });
   const [f, setF] = useState({sources:[],categories:[],urgency:[],q:''});
 
-  // Recompute trending + CORTEX rankings whenever news, social, or HF data changes
+  // Recompute trending + CORTEX rankings whenever news, social, HF data, or
+  // the selected use-case view changes
   useEffect(()=>{
     if (newsData.length || socialData.length) {
       const t = computeTrending(newsData, socialData);
       if (t) setTrendingData(t);
     }
-    const next = computeRankings(LEADERBOARD, newsData, socialData, hfModels, prevScores.current);
-    prevScores.current = Object.fromEntries(next.map(m => [m.name, m.cortexScore]));
+    const next = computeRankings(LEADERBOARD, newsData, socialData, hfModels,
+      prevScores.current[useCase], USE_CASES[useCase]);
+    prevScores.current[useCase] = Object.fromEntries(next.map(m => [m.name, m.cortexScore]));
     setRankings(next);
-  },[newsData, socialData, hfModels]);
+  },[newsData, socialData, hfModels, useCase]);
+
+  // Live item counts per category — shown on the filter chips
+  const catCounts = useMemo(()=>{
+    const c = {};
+    for (const i of newsData)   c[i.cat] = (c[i.cat]||0) + 1;
+    for (const i of socialData) c[i.cat] = (c[i.cat]||0) + 1;
+    return c;
+  },[newsData, socialData]);
 
   useEffect(()=>{
     const tick=()=>{const n=new Date();setClock(n.toISOString().replace('T',' ').slice(0,19)+'Z');};
@@ -1617,7 +1673,7 @@ function App() {
       <div className="fbar">
         {[
           {id:'reddit',l:'Social'},{id:'mainstream',l:'News'},
-          {id:'github',l:'GitHub'},{id:'arxiv',l:'arXiv'},{id:'hn',l:'HN'},
+          {id:'arxiv',l:'arXiv'},{id:'hn',l:'HN'},
         ].map(s=>(
           <button key={s.id} className={`chip${f.sources.includes(s.id)?' on':''}`} onClick={()=>tog('sources',s.id)}>{s.l}</button>
         ))}
@@ -1626,7 +1682,10 @@ function App() {
           {id:'models',l:'Models'},{id:'research',l:'Research'},{id:'products',l:'Products'},
           {id:'funding',l:'Funding'},{id:'policy',l:'Policy'},{id:'opensource',l:'Open Source'},
         ].map(c=>(
-          <button key={c.id} className={`chip${f.categories.includes(c.id)?' on':''}`} onClick={()=>tog('categories',c.id)}>{c.l}</button>
+          <button key={c.id} className={`chip${f.categories.includes(c.id)?' on':''}`} onClick={()=>tog('categories',c.id)}>
+            {c.l}
+            {catCounts[c.id] > 0 && <span style={{opacity:.6,marginLeft:5,fontFamily:'var(--mono)',fontSize:11}}>{catCounts[c.id]}</span>}
+          </button>
         ))}
         <div className="fdiv"/>
         {[['FLASH','fl'],['PRIORITY','pr'],['ROUTINE','']].map(([u,c])=>(
@@ -1745,8 +1804,19 @@ function App() {
             </div>
           </div>
           <div id="pc-right" className="pc">
+            {/* Use-case views — re-weight the capability half of the score */}
+            <div style={{display:'flex',gap:4,padding:'8px 12px',borderBottom:'1px solid var(--br)',flexWrap:'wrap'}}
+              onClick={e=>e.stopPropagation()}>
+              {Object.entries(USE_CASES).map(([k,uc])=>(
+                <button key={k}
+                  className={`chip${useCase===k?' on':''}`}
+                  style={{fontSize:11,padding:'3px 10px'}}
+                  title={uc.desc}
+                  onClick={()=>setUseCase(k)}>{uc.label}</button>
+              ))}
+            </div>
             <div className="sec-div">
-              <span>CORTEX Rankings</span>
+              <span>CORTEX Rankings · {USE_CASES[useCase].label}</span>
               <span style={{display:'flex',gap:8,alignItems:'center'}}>
                 <span style={{color:'var(--cM)',fontSize:9}}>● CAP</span>
                 <span style={{color:'#30d158',fontSize:9}}>● MOM</span>
@@ -1799,7 +1869,7 @@ function App() {
         </div>
       </div>
 
-      {showModels&&<ModelsOverlay rankings={rankings} onClose={()=>setShowModels(false)}/>}
+      {showModels&&<ModelsOverlay rankings={rankings} useCase={useCase} onClose={()=>setShowModels(false)}/>}
       {showWl&&<WatchlistModal wl={wl} onAdd={addKw} onRemove={rmKw} onClose={()=>setShowWl(false)}/>}
     </div>
   );
